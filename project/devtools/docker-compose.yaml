@@ -1,0 +1,28 @@
+services:
+  broker:
+    image: apache/activemq-artemis:latest
+    container_name: broker
+    networks:
+      - autoqa
+    ports:
+      - "61616:61616"  # JMS
+      - "8161:8161"    # Web console
+      - "1099:1099"    # JMX
+    environment:
+      #ARTEMIS_USERNAME: admin
+      #ARTEMIS_PASSWORD: admin
+      ARTEMIS_ALLOW_ANONYMOUS: "true"
+      JAVA_ARGS: >
+        -Xmx1G
+        -Djava.net.preferIPv4Addresses=true
+        -XX:+PrintClassHistogram
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+    volumes:
+      - ./config/broker.xml:/var/lib/artemis/etc/broker.xml:ro
+      - ./config/artemis-users.properties:/var/lib/artemis/etc/artemis-users.properties:ro
+      - ./config/artemis-roles.properties:/var/lib/artemis/etc/artemis-roles.properties:ro
+
+networks:
+  autoqa:
+    external: true

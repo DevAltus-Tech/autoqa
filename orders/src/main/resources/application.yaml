@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: heartbeat
+
+
+management:
+  server:
+    port: 8080
+
+broker:
+  url: ${BROKER_URL:tcp://localhost:61616}
+  username: admin
+  password: admin
+
+
+orders:
+  topic: orders.topic
+
+heartbeat:
+  topic: heartbeat.topic

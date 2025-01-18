@@ -1,0 +1,16 @@
+<restrict>
+  <!-- Allow GET/POST -->
+  <http>
+    <method>GET</method>
+    <method>POST</method>
+  </http>
+
+  <!-- Allow all hosts -->
+  <host>.*</host>
+
+  <!-- Allow all origins -->
+  <origin>.*</origin>
+
+  <!-- Allow all remote IPs -->
+  <remote>.*</remote>
+</restrict>

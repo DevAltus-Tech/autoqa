@@ -1,0 +1,12 @@
+<!-- The namespace is important for newer Jolokia versions -->
+<restrictor xmlns="http://www.jolokia.org/xml/ns/jolokia">
+
+  <cors>
+    <!-- Allow requests from any Origin.  -->
+    <allow-origin>.*</allow-origin>
+
+    <!-- Relax strict checking so it's less picky about the actual values -->
+    <strict-checking>false</strict-checking>
+  </cors>
+
+</restrictor>
