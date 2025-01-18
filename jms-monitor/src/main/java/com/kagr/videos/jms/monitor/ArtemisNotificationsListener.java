@@ -4,6 +4,7 @@ package com.kagr.videos.jms.monitor;
 
 
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class ArtemisNotificationsListener implements MessageListener
 
 
     @Autowired
-    public ArtemisNotificationsListener(Connection jmsConnection) throws JMSException
+    public ArtemisNotificationsListener(@NonNull Connection jmsConnection) throws JMSException
     {
         this.jmsConnection = jmsConnection;
         final Session session = jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -47,6 +48,12 @@ public class ArtemisNotificationsListener implements MessageListener
 
     public ArtemisNotificationsListener startListening() throws JMSException
     {
+        logger.info("Starting to listen for notifications");
+        if (jmsConnection == null)
+        {
+            throw new IllegalStateException("JMS connection is null");
+        }
+
         jmsConnection.start();
         return this;
     }

@@ -1,4 +1,4 @@
-package com.kagr.videos.orders;
+package com.kagr.videos.heartbeat;
 
 
 
@@ -31,9 +31,8 @@ import javax.jms.Topic;
 @Data
 @Configuration
 @ConfigurationProperties
-public class OrdersConfig
+public class HearbeatConfig
 {
-
     @Value("${broker.url}")
     private String brokerAddress;
 
@@ -43,8 +42,8 @@ public class OrdersConfig
     @Value("${broker.password}")
     private String password;
 
-    @Value("${orders.topic}")
-    private String ordersTopic;
+    @Value("${heartbeat.topic}")
+    private String heartbeatTopic;
 
     @Value("${spring.application.name}")
     private String appName;
@@ -85,8 +84,8 @@ public class OrdersConfig
     @Bean
     public MessageProducer ordersMessageProducer(Session session) throws JMSException
     {
-        logger.info("Creating OrderProducer for topic: {}", ordersTopic);
-        Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
+        logger.info("Creating OrderProducer for topic: {}", heartbeatTopic);
+        Topic theTopic = ActiveMQJMSClient.createTopic(heartbeatTopic);
         return session.createProducer(theTopic);
     }
 
@@ -100,4 +99,5 @@ public class OrdersConfig
         logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
         return new ArtemisNotificationsListener(jmsConnection).startListening();
     }
+
 }

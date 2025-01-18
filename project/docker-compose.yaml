@@ -1,22 +1,43 @@
 services:
-  orders:
-    image: orders:latest
-    container_name: orders
+
+  heartbeat:
+    image: heartbeat:latest
+    container_name: heartbeat
     networks:
       - autoqa
     environment:
-        BROKER_URL: "tcp://broker:61616"
-        BROKER_USERNAME: artemis
-        BROKER_PASSWORD: artemis
-        LOG_FILE: "/app/var/log/orders.log"
-        LOG_LEVEL: "INFO"
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/heartbeat.log"
+      LOG_LEVEL: "INFO"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s
       timeout: 10s
       retries: 3
     volumes:
-        - ./var/log:/app/var/log
+      - ./var/log:/app/var/log
+
+
+  orders:
+    image: orders:latest
+    container_name: orders
+    networks:
+      - autoqa
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/orders.log"
+      LOG_LEVEL: "INFO"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./var/log:/app/var/log
 
 
 volumes:

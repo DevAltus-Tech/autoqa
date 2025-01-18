@@ -1,7 +1,6 @@
 spring:
   application:
-    name: orders
-
+    name: heartbeat
 
 management:
   server:

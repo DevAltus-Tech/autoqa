@@ -12,12 +12,8 @@
 
     <groupId>com.kagr.videos</groupId>
     <artifactId>orders</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
 
     <dependencies>
@@ -26,7 +22,6 @@
             <artifactId>jms-monitor</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
 
 
@@ -67,7 +62,7 @@
                 <version>3.4.4</version>
                 <configuration>
                     <to>
-                        <image>orders</image>
+                        <image>${project.name}</image>
                         <credHelper></credHelper>
                         <tags>
                             <tag>latest</tag>
