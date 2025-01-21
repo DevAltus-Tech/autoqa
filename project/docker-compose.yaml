@@ -31,6 +31,8 @@ services:
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/orders.log"
       LOG_LEVEL: "INFO"
+    ports:
+      - "5005:5005"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s

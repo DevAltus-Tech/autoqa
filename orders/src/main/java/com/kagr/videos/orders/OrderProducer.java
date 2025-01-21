@@ -19,8 +19,7 @@ import javax.jms.MessageProducer;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class OrderProducer
-{
+public class OrderProducer {
     private final MessageProducer ordersMessageProducer;
 
 
@@ -28,9 +27,16 @@ public class OrderProducer
 
 
     @PostConstruct
-    public void init()
-    {
+    public void init() {
         logger.info("OrderProducer initialized");
+    }
+
+
+
+
+
+    public void handleJmsEvent(String event, String name) {
+        logger.warn("Received event: {} for name: {}", event, name);
     }
 
 

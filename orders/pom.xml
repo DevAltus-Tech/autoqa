@@ -15,7 +15,6 @@
     <version>0.1-SNAPSHOT</version>
 
 
-
     <dependencies>
         <dependency>
             <groupId>com.kagr.videos</groupId>
@@ -73,8 +72,13 @@
                     <from>
                         <image>amazoncorretto:21</image>
                     </from>
+
                     <container>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <!--
+                        <environment>
+                            <JAVA_TOOL_OPTIONS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005</JAVA_TOOL_OPTIONS>
+                        </environment>-->
                     </container>
                 </configuration>
                 <executions>

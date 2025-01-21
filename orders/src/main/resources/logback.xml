@@ -17,8 +17,10 @@
         </encoder>
     </appender>
 
+    <logger name="com.kagr.videos.jms.monitor" level="WARN"/>
+
     <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

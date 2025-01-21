@@ -22,6 +22,9 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 
 
@@ -31,8 +34,7 @@ import javax.jms.Topic;
 @Data
 @Configuration
 @ConfigurationProperties
-public class HearbeatConfig
-{
+public class HearbeatConfig {
     @Value("${broker.url}")
     private String brokerAddress;
 
@@ -53,8 +55,7 @@ public class HearbeatConfig
 
 
     @Bean
-    public Connection jmsConnection() throws javax.jms.JMSException
-    {
+    public Connection jmsConnection() throws javax.jms.JMSException {
         TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
         ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
         connectionFactory.setBrokerURL(brokerAddress);
@@ -70,8 +71,7 @@ public class HearbeatConfig
 
 
     @Bean
-    public Session jmsSession(Connection connection) throws JMSException
-    {
+    public Session jmsSession(Connection connection) throws JMSException {
         logger.info("Creating Session for connection: {}", connection);
         Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
         return session;
@@ -82,8 +82,7 @@ public class HearbeatConfig
 
 
     @Bean
-    public MessageProducer ordersMessageProducer(Session session) throws JMSException
-    {
+    public MessageProducer ordersMessageProducer(Session session) throws JMSException {
         logger.info("Creating OrderProducer for topic: {}", heartbeatTopic);
         Topic theTopic = ActiveMQJMSClient.createTopic(heartbeatTopic);
         return session.createProducer(theTopic);
@@ -94,10 +93,18 @@ public class HearbeatConfig
 
 
     @Bean
-    public ArtemisNotificationsListener artemisNotificationsListener(Connection jmsConnection) throws JMSException
-    {
+    public Set<BiConsumer<String, String>> consumers() {
+        return new HashSet<>();
+    }
+
+
+
+
+
+    @Bean
+    public ArtemisNotificationsListener artemisNotificationsListener(Connection jmsConnection, Set<BiConsumer<String, String>> consumers) throws JMSException {
         logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
-        return new ArtemisNotificationsListener(jmsConnection).startListening();
+        return new ArtemisNotificationsListener(jmsConnection, consumers).startListening();
     }
 
 }
