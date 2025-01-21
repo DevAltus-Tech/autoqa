@@ -39,3 +39,16 @@ validator:
   output:
     report:
       template: /html/report.vm
+
+
+
+
+tests:
+  jms-connect:
+     - orders
+     - heartbeat
+  log-validation:
+    orders:
+      - "Send order: [\.]"
+      - "Received order: [\.]"
+      - "Heartbeat received"

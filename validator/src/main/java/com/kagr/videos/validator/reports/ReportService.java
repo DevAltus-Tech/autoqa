@@ -40,11 +40,7 @@ public class ReportService {
     public String generateReport() {
         VelocityContext context = new VelocityContext();
         logger.info("generating report for {} tests", tests.size());
-        for (var test : tests) {
-            context.put(test.getTestName() + "-name", test.getTestName());
-            context.put(test.getTestName() + "-status", test.getStatus());
-            context.put(test.getTestName() + "-notes", test.getNotes());
-        }
+        context.put("services", tests);
 
         StringWriter writer = new StringWriter();
         reportTemplate.merge(context, writer);
@@ -57,8 +53,9 @@ public class ReportService {
 
     public void addTest(@NonNull final TestStatus test) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding test: {}", test);
+            logger.debug("{} Adding test: {}", getClass().getSimpleName(), test);
         }
+
         tests.add(test);
     }
 }

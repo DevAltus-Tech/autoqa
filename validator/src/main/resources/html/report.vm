@@ -42,18 +42,18 @@
             font-weight: normal;
         }
 
-        .status {
-            text-align: center;
-            font-weight: bold;
-            color: white;
-        }
-
         .status-pass {
             background-color: #4CAF50; /* Dark green for pass */
+            color: white;
+            text-align: center;
+            font-weight: bold;
         }
 
         .status-fail {
             background-color: #F44336; /* Dark red for fail */
+            color: white;
+            text-align: center;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -61,42 +61,20 @@
     <h1 class="header">Report</h1>
 
     <section>
-        <h2 class="header">Data</h2>
+        <h2 class="header">Status Overview</h2>
         <table>
-            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
-            <tr><td class="status ${orderEngineClass}">${orderEngineText}</td><td>Order Engine</td><td>Normal operation</td></tr>
-            <tr><td class="status ${orderFillerClass}">${orderFillerText}</td><td>Order Filler</td><td>Check error logs</td></tr>
-            <tr><td class="status ${heartbeatClass}">${heartbeatText}</td><td>Heartbeat</td><td>Monitoring</td></tr>
-        </table>
-    </section>
-
-    <section>
-        <h2 class="header">Graceful Startup</h2>
-        <table>
-            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
-            <tr><td class="status ${startupOrderEngineClass}">${startupOrderEngineText}</td><td>Order Engine</td><td>Started without issues</td></tr>
-            <tr><td class="status ${startupOrderFillerClass}">${startupOrderFillerText}</td><td>Order Filler</td><td>Delay in response</td></tr>
-            <tr><td class="status ${startupHeartbeatClass}">${startupHeartbeatText}</td><td>Heartbeat</td><td>Stable</td></tr>
-        </table>
-    </section>
-
-    <section>
-        <h2 class="header">Execution</h2>
-        <table>
-            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
-            <tr><td class="status ${executionOrderEngineClass}">${executionOrderEngineText}</td><td>Order Engine</td><td>Performance optimal</td></tr>
-            <tr><td class="status ${executionOrderFillerClass}">${executionOrderFillerText}</td><td>Order Filler</td><td>Needs maintenance</td></tr>
-            <tr><td class="status ${executionHeartbeatClass}">${executionHeartbeatText}</td><td>Heartbeat</td><td>Monitoring</td></tr>
-        </table>
-    </section>
-
-    <section>
-        <h2 class="header">Graceful Shutdown</h2>
-        <table>
-            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
-            <tr><td class="status ${shutdownOrderEngineClass}">${shutdownOrderEngineText}</td><td>Order Engine</td><td>Shutdown sequence complete</td></tr>
-            <tr><td class="status ${shutdownOrderFillerClass}">${shutdownOrderFillerText}</td><td>Order Filler</td><td>Check before reactivation</td></tr>
-            <tr><td class="status ${shutdownHeartbeatClass}">${shutdownHeartbeatText}</td><td>Heartbeat</td><td>Offline</td></tr>
+            <tr>
+                <th>Status</th>
+                <th>Service</th>
+                <th>Notes</th>
+            </tr>
+            #foreach ($service in $services)
+            <tr>
+                <td class="status-${service.status.toLowerCase()}">$service.status</td>
+                <td>$service.testName</td>
+                <td>$service.notes</td>
+            </tr>
+            #end
         </table>
     </section>
 

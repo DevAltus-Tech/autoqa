@@ -5,6 +5,8 @@ package com.kagr.videos.validator;
 
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import com.kagr.videos.validator.reports.ReportService;
+import com.kagr.videos.validator.reports.TestStatus;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -64,6 +66,7 @@ public class ValidorConfig {
 
 
 
+
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
         TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
@@ -92,12 +95,59 @@ public class ValidorConfig {
 
 
     @Bean
-    public Set<BiConsumer<String, String>> consumers() {
+    public HashMap<String, TestStatus> pendingTests(
+        @NonNull final TestConfig testConfig) {
+        if (logger.isTraceEnabled()) {
+            logger.trace("ValidorConfig::pendingTests");
+        }
+        HashMap<String, TestStatus> pendingTests = new HashMap<>();
+        var connectList = testConfig.getConnect();
+        while (connectList.size() > 0) {
+            var name = connectList.remove(0) + Defaults.DEFAULT_CONNECT;
+            TestStatus testStatus = new TestStatus(name, "PENDING", "");
+            logger.info("adding test:{}", testStatus);
+            pendingTests.put(name, testStatus);
+        }
+        return pendingTests;
+    }
+
+
+
+
+
+    @Bean
+    public Set<TestStatus> completedTests() {
+        if (logger.isTraceEnabled()) {
+            logger.trace("ValidorConfig::completedTests");
+        }
+        return new HashSet<>();
+    }
+
+
+
+
+
+    @Bean
+    public TestCollector testCollector(@NonNull final ReportService reportService,
+                                       @NonNull final HashMap<String, TestStatus> pendingTests) {
+        var collector = new TestCollector(
+            reportService,
+            pendingTests);
+
+        return collector;
+    }
+
+
+
+
+
+    @Bean
+    public Set<BiConsumer<String, String>> consumers(@NonNull final TestCollector collector) {
         if (jmsConsumers == null) {
             logger.info("Creating empty set of consumers");
             return new HashSet<>();
         }
-
+        jmsConsumers.add(collector::handleJmsEvent);
         return jmsConsumers;
     }
 

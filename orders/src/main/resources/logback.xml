@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="false">
+
     <property name="LOG_FILE" value="${LOG_FILE:-/app/var/log/application.log}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL:-info}"/>
 

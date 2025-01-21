@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import java.io.FileOutputStream;
 import java.io.StringWriter;
@@ -25,6 +26,7 @@ import java.util.Random;
 @Slf4j
 @SpringBootApplication(scanBasePackages = {"com.kagr.videos.validator"})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@EnableConfigurationProperties({TestConfig.class, ValidorConfig.class})
 public class ValidatorMain {
 
     public final Template reportTemplate;

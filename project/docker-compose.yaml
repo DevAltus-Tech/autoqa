@@ -1,5 +1,4 @@
 services:
-
   validator:
     image: validator:latest
     container_name: validator
@@ -16,7 +15,7 @@ services:
       - "8081:8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
+      interval: 10s
       timeout: 10s
       retries: 3
     volumes:
@@ -28,6 +27,9 @@ services:
     container_name: heartbeat
     networks:
       - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
@@ -50,6 +52,9 @@ services:
     container_name: orders
     networks:
       - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis

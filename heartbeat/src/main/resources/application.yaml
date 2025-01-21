@@ -5,6 +5,17 @@ spring:
 management:
   server:
     port: 8080
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+server:
+  error:
+    whitelabel:
+      enabled: false  # Disable the default error response page
+    include-message: always
+    include-binding-errors: always
 
 broker:
   url: ${BROKER_URL:tcp://localhost:61616}
