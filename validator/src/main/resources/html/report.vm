@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            margin: 20px;
+            color: #333;
+            background-color: #fff;
+            font-size: 12px;
+        }
+
+        .header {
+            background-color: #e9e9e9;
+            color: #333;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: normal;
+        }
+
+        .status {
+            text-align: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-pass {
+            background-color: #4CAF50; /* Dark green for pass */
+        }
+
+        .status-fail {
+            background-color: #F44336; /* Dark red for fail */
+        }
+    </style>
+</head>
+<body>
+    <h1 class="header">Report</h1>
+
+    <section>
+        <h2 class="header">Data</h2>
+        <table>
+            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
+            <tr><td class="status ${orderEngineClass}">${orderEngineText}</td><td>Order Engine</td><td>Normal operation</td></tr>
+            <tr><td class="status ${orderFillerClass}">${orderFillerText}</td><td>Order Filler</td><td>Check error logs</td></tr>
+            <tr><td class="status ${heartbeatClass}">${heartbeatText}</td><td>Heartbeat</td><td>Monitoring</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2 class="header">Graceful Startup</h2>
+        <table>
+            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
+            <tr><td class="status ${startupOrderEngineClass}">${startupOrderEngineText}</td><td>Order Engine</td><td>Started without issues</td></tr>
+            <tr><td class="status ${startupOrderFillerClass}">${startupOrderFillerText}</td><td>Order Filler</td><td>Delay in response</td></tr>
+            <tr><td class="status ${startupHeartbeatClass}">${startupHeartbeatText}</td><td>Heartbeat</td><td>Stable</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2 class="header">Execution</h2>
+        <table>
+            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
+            <tr><td class="status ${executionOrderEngineClass}">${executionOrderEngineText}</td><td>Order Engine</td><td>Performance optimal</td></tr>
+            <tr><td class="status ${executionOrderFillerClass}">${executionOrderFillerText}</td><td>Order Filler</td><td>Needs maintenance</td></tr>
+            <tr><td class="status ${executionHeartbeatClass}">${executionHeartbeatText}</td><td>Heartbeat</td><td>Monitoring</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2 class="header">Graceful Shutdown</h2>
+        <table>
+            <tr><th>Status</th><th>Service</th><th>Notes</th></tr>
+            <tr><td class="status ${shutdownOrderEngineClass}">${shutdownOrderEngineText}</td><td>Order Engine</td><td>Shutdown sequence complete</td></tr>
+            <tr><td class="status ${shutdownOrderFillerClass}">${shutdownOrderFillerText}</td><td>Order Filler</td><td>Check before reactivation</td></tr>
+            <tr><td class="status ${shutdownHeartbeatClass}">${shutdownHeartbeatText}</td><td>Heartbeat</td><td>Offline</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2 class="header">Logs</h2>
+        <!-- Logs content goes here -->
+    </section>
+</body>
+</html>

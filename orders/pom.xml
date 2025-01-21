@@ -12,14 +12,14 @@
 
     <groupId>com.kagr.videos</groupId>
     <artifactId>orders</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${orders.version}</version>
 
 
     <dependencies>
         <dependency>
             <groupId>com.kagr.videos</groupId>
             <artifactId>jms-monitor</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${jms-monitor.version}</version>
         </dependency>
     </dependencies>
 

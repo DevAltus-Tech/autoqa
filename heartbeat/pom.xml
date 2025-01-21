@@ -12,15 +12,14 @@
 
     <groupId>com.kagr.videos</groupId>
     <artifactId>heartbeat</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${heartbeat.version}</version>
 
 
     <dependencies>
         <dependency>
             <groupId>com.kagr.videos</groupId>
             <artifactId>jms-monitor</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${jms-monitor.version}</version>
         </dependency>
     </dependencies>
 

@@ -1,4 +1,4 @@
-package com.kagr.videos.validator.loggers;
+package com.kagr.videos.validator.logs;
 
 
 

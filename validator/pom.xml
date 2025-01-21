@@ -12,6 +12,92 @@
 
     <groupId>com.kagr.videos</groupId>
     <artifactId>validator</artifactId>
+    <version>${validator.version}</version>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.kagr.videos</groupId>
+            <artifactId>jms-monitor</artifactId>
+            <version>${jms-monitor.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <mainClass>com.kagr.videos.validator.ValidatorMain</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.4</version>
+                <configuration>
+                    <to>
+                        <image>${project.name}</image>
+                        <credHelper></credHelper>
+                        <tags>
+                            <tag>latest</tag>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+
+                    <from>
+                        <image>amazoncorretto:21</image>
+                    </from>
+
+                    <container>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <!--<environment>
+                            <JAVA_TOOL_OPTIONS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005</JAVA_TOOL_OPTIONS>
+                        </environment>-->
+                    </container>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>

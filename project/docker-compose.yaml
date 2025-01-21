@@ -1,5 +1,28 @@
 services:
 
+  validator:
+    image: validator:latest
+    container_name: validator
+    networks:
+      - autoqa
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/validator.log"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "5005:5005"
+      - "8081:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./var/log:/app/var/log
+
+
   heartbeat:
     image: heartbeat:latest
     container_name: heartbeat
@@ -11,6 +34,8 @@ services:
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/heartbeat.log"
       LOG_LEVEL: "INFO"
+    ports:
+      - "5006:5005"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s
@@ -32,7 +57,7 @@ services:
       LOG_FILE: "/app/var/log/orders.log"
       LOG_LEVEL: "INFO"
     ports:
-      - "5005:5005"
+      - "5007:5005"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s
