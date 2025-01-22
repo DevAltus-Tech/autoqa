@@ -30,9 +30,11 @@ broker:
 
 orders:
   topic: orders.topic
+  log: /app/var/log/orders.log
 
 heartbeat:
   topic: heartbeat.topic
+  log: /app/var/log/heartbeat.log
 
 
 validator:
@@ -49,6 +51,6 @@ tests:
      - heartbeat
   log-validation:
     orders:
-      - "Send order: [\.]"
-      - "Received order: [\.]"
+      - "Send order: [\\.]"
+      - "Received order: [\\.]"
       - "Heartbeat received"

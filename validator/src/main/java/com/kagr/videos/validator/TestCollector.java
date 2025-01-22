@@ -4,6 +4,7 @@ package com.kagr.videos.validator;
 
 
 
+import com.kagr.videos.validator.logs.DockerLogsReader;
 import com.kagr.videos.validator.reports.ReportService;
 import com.kagr.videos.validator.reports.TestStatus;
 import lombok.Data;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -24,11 +25,15 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class TestCollector {
+public class TestCollector implements Runnable {
 
     private final ReportService reportService;
-
     private final HashMap<String, TestStatus> pendingTests;
+    private final String ordersLog;
+    private final String heartbeatLog;
+
+    private final HashMap<String, DockerLogsReader> logReaders = new HashMap<>();
+    private final LinkedBlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
 
 
 
@@ -45,12 +50,12 @@ public class TestCollector {
                 actual.setStatus("PASS");
                 actual.setNotes("Consumer created successfully");
                 reportService.addTest(actual);
+                startLogListener(service);
             }
         }
         else {
             logger.warn("Ignoring event:{}/{}", status, service);
         }
-
 
 
         logger.info("total pending tests: {}", pendingTests.size());
@@ -64,7 +69,60 @@ public class TestCollector {
 
 
 
+    private void startLogListener(final String name) {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Starting log listener for: {}", name);
+        }
+        if (StringUtils.equalsIgnoreCase(name, Defaults.HEARTBEAT)) {
+            startLogReader(heartbeatLog);
+        }
+        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDERS)) {
+            startLogReader(ordersLog);
+        }
+        else {
+            logger.error("Unknown service: {}", name);
+        }
+    }
+
+
+
+
+
+    private void startLogReader(String name) {
+        logger.info("starting log reader for: {}", name);
+        try (var logReader = new DockerLogsReader(name, logQueue)) {
+            new Thread(logReader).start();
+            logReaders.put(name, logReader);
+            logger.info("log reader started for: {}", name);
+        }
+        catch (Exception ex) {
+            logger.error(ex.toString(), ex);
+        }
+    }
+
+
+
+
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                var log = logQueue.take();
+                logger.info("log: {}", log);
+            }
+            catch (InterruptedException e) {
+                logger.error(e.toString(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+
+
+
+
     public void collectTests() {
-        // Collect tests
+
     }
 }

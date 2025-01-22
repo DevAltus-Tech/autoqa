@@ -27,22 +27,24 @@ import java.util.Queue;
 public class DockerLogsReader implements Runnable, AutoCloseable {
     private final String loggerFileName;
     private final Queue<String> logsRead;
-    private boolean shouldContinue = true;
+    private boolean shouldContinue;
 
 
 
 
-
+/**/
     @Override
     public void run() {
         Path loggerFile = Paths.get(loggerFileName);
         long lastKnownPosition = 0;
 
+        logger.info("Reading logger file: {}", loggerFileName.toString());
         try (RandomAccessFile file = new RandomAccessFile(loggerFile.toFile(), "r");
              BufferedReader reader = new BufferedReader(new FileReader(file.getFD()))) {
             logger.info("Starting to tail logger file: {}", loggerFileName);
 
-            while (shouldContinue) {
+            shouldContinue = true;
+            while (true) {
                 file.seek(lastKnownPosition);
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -53,6 +55,8 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
                 logger.debug("Sleeping for 100 milliseconds before checking for new logger entries");
                 Thread.sleep(100);
             }
+
+            //logger.warn("finished reading logger file: {}", loggerFileName);
         }
         catch (IOException e) {
             logger.error("Error reading logger file", e);

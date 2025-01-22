@@ -57,6 +57,15 @@ public class ValidorConfig {
     @Value("${orders.topic}")
     private String ordersTopic;
 
+    @Value("${heartbeat.topic}")
+    private String heartbeatTopic;
+
+    @Value("${orders.log}")
+    private String ordersLog;
+
+    @Value("${heartbeat.log}")
+    private String heartbeatLog;
+
     @Value("${spring.application.name}")
     private String appName;
 
@@ -95,13 +104,33 @@ public class ValidorConfig {
 
 
     @Bean
+    public String ordersLog() {
+        logger.debug("ordersLog:{}", ordersLog);
+        return ordersLog;
+    }
+
+
+
+
+
+    @Bean
+    public String heartbeatLog() {
+        logger.debug("heartbeatLog:{}", heartbeatLog);
+        return heartbeatLog;
+    }
+
+
+
+
+
+    @Bean
     public HashMap<String, TestStatus> pendingTests(
         @NonNull final TestConfig testConfig) {
         if (logger.isTraceEnabled()) {
             logger.trace("ValidorConfig::pendingTests");
         }
         HashMap<String, TestStatus> pendingTests = new HashMap<>();
-        var connectList = testConfig.getConnect();
+        var connectList = testConfig.getJmsConnect();
         while (connectList.size() > 0) {
             var name = connectList.remove(0) + Defaults.DEFAULT_CONNECT;
             TestStatus testStatus = new TestStatus(name, "PENDING", "");
@@ -132,8 +161,10 @@ public class ValidorConfig {
                                        @NonNull final HashMap<String, TestStatus> pendingTests) {
         var collector = new TestCollector(
             reportService,
-            pendingTests);
-
+            pendingTests,
+            ordersLog,
+            heartbeatLog);
+        new Thread(collector).start();
         return collector;
     }
 

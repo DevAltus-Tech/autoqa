@@ -81,7 +81,15 @@
                     </from>
 
                     <container>
+                        <args>
+                            <arg>-Dlogback.configurationFile=/app/etc/logback.xml</arg>
+                        </args>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <environment>
+                            <LOG_FILE>/app/var/log/application.log</LOG_FILE>
+                            <LOG_LEVEL>info</LOG_LEVEL>
+                        </environment>
+
                         <!--<environment>
                             <JAVA_TOOL_OPTIONS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005</JAVA_TOOL_OPTIONS>
                         </environment>-->

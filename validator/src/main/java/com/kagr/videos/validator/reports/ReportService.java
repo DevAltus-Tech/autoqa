@@ -31,6 +31,7 @@ public class ReportService {
     private final VelocityEngine velocityEngine;
     private final Template reportTemplate;
     private final List<TestStatus> tests;
+    private final TestStatus globalStatus = new TestStatus("Global Status", "PENDING", "");
 
 
 
@@ -41,6 +42,7 @@ public class ReportService {
         VelocityContext context = new VelocityContext();
         logger.info("generating report for {} tests", tests.size());
         context.put("services", tests);
+        context.put("globalStatus", globalStatus);
 
         StringWriter writer = new StringWriter();
         reportTemplate.merge(context, writer);
@@ -57,5 +59,19 @@ public class ReportService {
         }
 
         tests.add(test);
+    }
+
+
+
+
+
+    public void updateGlobalStatus(boolean pass, String notes) {
+        globalStatus.setNotes(notes);
+        if (pass) {
+            globalStatus.setStatus("PASS");
+        }
+        else {
+            globalStatus.setStatus("FAIL");
+        }
     }
 }

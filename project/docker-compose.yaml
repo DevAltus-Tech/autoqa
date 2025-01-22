@@ -20,6 +20,8 @@ services:
       retries: 3
     volumes:
       - ./var/log:/app/var/log
+      - ./src/main/resources/logback.xml:/app/etc/logback.xml:ro
+
 
 
   heartbeat:
