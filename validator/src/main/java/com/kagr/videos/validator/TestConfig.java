@@ -21,7 +21,17 @@ import java.util.List;
 @ConfigurationProperties(prefix = "tests")
 public class TestConfig {
     private List<String> jmsConnect;
-    private List<String> logValidationOrders;
+    private LogValidation logValidation;
+
+
+
+
+
+    @Data
+    public static class LogValidation {
+        private List<String> heartbeat;
+        private List<String> orders;
+    }
 
 
 }

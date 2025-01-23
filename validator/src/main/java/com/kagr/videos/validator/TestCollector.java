@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 
 
@@ -28,7 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TestCollector implements Runnable {
 
     private final ReportService reportService;
-    private final HashMap<String, TestStatus> pendingTests;
+    private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final String ordersLog;
     private final String heartbeatLog;
 
@@ -44,12 +46,12 @@ public class TestCollector implements Runnable {
 
         if (StringUtils.equals(Defaults.CONSUMER_CREATED, status)) {
             var name = service + Defaults.DEFAULT_CONNECT;
-            var actual = pendingTests.remove(name);
+            var actual = pendingTests.get(name);
             if (actual != null) {
                 logger.info("Test {} completed", name);
                 actual.setStatus("PASS");
                 actual.setNotes("Consumer created successfully");
-                reportService.addTest(actual);
+                //reportService.addTest(actual);
                 startLogListener(service);
             }
         }
@@ -109,7 +111,31 @@ public class TestCollector implements Runnable {
         while (true) {
             try {
                 var log = logQueue.take();
-                logger.info("log: {}", log);
+                synchronized (pendingTests) {
+                    //logger.info("log: {}", log);
+                    for (var entry : pendingTests.entrySet()) {
+                        var test = entry.getValue();
+                        if (StringUtils.contains(log, test.getTestName())) {
+                            test.setStatus("PASS");
+                            test.setNotes("Log entry found");
+                            //reportService.addTest(test);
+                            //pendingTests.remove(entry.getKey());
+                            logger.info("Test completed: {}", test);
+                        }
+                        else if (Pattern.matches(test.getTestName(), log)) {
+                            test.setStatus("PASS");
+                            test.setNotes("Log entry found, regex");
+                            //reportService.addTest(test);
+                            //pendingTests.remove(entry.getKey());
+                            logger.info("Test completed: {}", test);
+                        }
+                        else {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("{} does not match:{}", test.getTestName(), log);
+                            }
+                        }
+                    }
+                }
             }
             catch (InterruptedException e) {
                 logger.error(e.toString(), e);
@@ -119,10 +145,4 @@ public class TestCollector implements Runnable {
     }
 
 
-
-
-
-    public void collectTests() {
-
-    }
 }

@@ -14,6 +14,10 @@
     <artifactId>orders</artifactId>
     <version>${orders.version}</version>
 
+    <properties>
+        <lang3.version>3.12.0</lang3.version>
+    </properties>
+
 
     <dependencies>
         <dependency>
@@ -21,6 +25,13 @@
             <artifactId>jms-monitor</artifactId>
             <version>${jms-monitor.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.17.0</version>
+        </dependency>
+
     </dependencies>
 
 
@@ -60,6 +71,7 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>3.4.4</version>
                 <configuration>
+
                     <to>
                         <image>${project.name}</image>
                         <credHelper></credHelper>
@@ -74,9 +86,11 @@
                     </from>
 
                     <container>
+                        <args>
+                            <arg>-Dlogback.configurationFile=/app/resources/logback.xml</arg>
+                        </args>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                        <!--
-                        <environment>
+                        <!--<environment>
                             <JAVA_TOOL_OPTIONS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005</JAVA_TOOL_OPTIONS>
                         </environment>-->
                     </container>

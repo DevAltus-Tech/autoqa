@@ -14,13 +14,10 @@ management:
 server:
   error:
     whitelabel:
-      enabled: false  # Disable the default error response page
+      enabled: true  # Disable the default error response page
     include-message: always
     include-binding-errors: always
 
-logging:
-  level:
-    org.springframework.web: TRACE  # Log errors from Spring MVC at ERROR level
 
 broker:
   url: ${BROKER_URL:tcp://localhost:61616}
@@ -47,10 +44,11 @@ validator:
 
 tests:
   jms-connect:
-     - orders
-     - heartbeat
+    - orders
+    - heartbeat
   log-validation:
+    heartbeat:
+      - "HEARTBEAT .* Sent heartbeat message.*"
     orders:
-      - "Send order: [\\.]"
-      - "Received order: [\\.]"
-      - "Heartbeat received"
+      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat"
+      - ".*ORDERS .* Heartbeat sequence.*"

@@ -19,8 +19,9 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - ./var/log:/app/var/log
-      - ./src/main/resources/logback.xml:/app/etc/logback.xml:ro
+      - logs:/app/var/log
+      - ../validator/target/classes/:/app/target/classes/:ro
+      - ../validator/src/main/resources/logback.xml:/app/resources/logback.xml:ro
 
 
 
@@ -46,7 +47,8 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - ./var/log:/app/var/log
+      - logs:/app/var/log
+
 
 
   orders:
@@ -63,6 +65,7 @@ services:
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/orders.log"
       LOG_LEVEL: "INFO"
+      CLASSPATH: "/app/classes:/app/resources"
     ports:
       - "5007:5005"
     healthcheck:
@@ -71,11 +74,17 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - ./var/log:/app/var/log
+      - logs:/app/var/log
+      - ../orders/target/classes/:/app/target/classes/:ro
+      - ../orders/src/main/resources/logback.xml:/app/resources/logback.xml:ro
 
 
 volumes:
-  orders_data:
+  logs:
+    driver: local
+    driver_opts:
+      type: 'tmpfs'
+      device: 'tmpfs'
 
 networks:
   autoqa:

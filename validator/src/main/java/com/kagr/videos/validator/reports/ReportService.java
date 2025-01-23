@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 
@@ -31,6 +32,7 @@ public class ReportService {
     private final VelocityEngine velocityEngine;
     private final Template reportTemplate;
     private final List<TestStatus> tests;
+    private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final TestStatus globalStatus = new TestStatus("Global Status", "PENDING", "");
 
 
@@ -40,9 +42,14 @@ public class ReportService {
     @GetMapping("generate")
     public String generateReport() {
         VelocityContext context = new VelocityContext();
+        tests.clear();
+        tests.addAll(pendingTests.values());
         logger.info("generating report for {} tests", tests.size());
         context.put("services", tests);
         context.put("globalStatus", globalStatus);
+
+
+
 
         StringWriter writer = new StringWriter();
         reportTemplate.merge(context, writer);

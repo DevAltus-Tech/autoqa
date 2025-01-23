@@ -10,6 +10,10 @@ management:
     web:
       exposure:
         include: "*"
+logging:
+  level:
+    org.springframework: OFF  # Log at INFO level
+    org.springframework.web: WARN  # Log errors from Spring MVC at ERROR level
 
 server:
   error:

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -33,6 +34,7 @@ import java.util.function.BiConsumer;
 @Slf4j
 @Data
 @Configuration
+@EnableScheduling
 @ConfigurationProperties
 public class HearbeatConfig {
     @Value("${broker.url}")

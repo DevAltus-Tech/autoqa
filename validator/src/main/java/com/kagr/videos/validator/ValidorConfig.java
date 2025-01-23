@@ -32,6 +32,7 @@ import javax.jms.Session;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 
@@ -124,12 +125,14 @@ public class ValidorConfig {
 
 
     @Bean
-    public HashMap<String, TestStatus> pendingTests(
+    public ConcurrentHashMap<String, TestStatus> pendingTests(
         @NonNull final TestConfig testConfig) {
         if (logger.isTraceEnabled()) {
             logger.trace("ValidorConfig::pendingTests");
         }
-        HashMap<String, TestStatus> pendingTests = new HashMap<>();
+
+        logger.info("adding connect tests");
+        ConcurrentHashMap<String, TestStatus> pendingTests = new ConcurrentHashMap<>();
         var connectList = testConfig.getJmsConnect();
         while (connectList.size() > 0) {
             var name = connectList.remove(0) + Defaults.DEFAULT_CONNECT;
@@ -137,6 +140,36 @@ public class ValidorConfig {
             logger.info("adding test:{}", testStatus);
             pendingTests.put(name, testStatus);
         }
+
+        logger.info("adding heart-beat tests");
+        var list = testConfig.getLogValidation().getHeartbeat();
+        if (list != null) {
+            while (list.size() > 0) {
+                var name = list.remove(0);
+                TestStatus testStatus = new TestStatus(name, "PENDING", "");
+                logger.info("adding test:{}", testStatus);
+                pendingTests.put(name, testStatus);
+            }
+        }
+        else {
+            logger.error("no heartbeat tests found");
+        }
+
+        logger.info("adding heart-beat tests");
+        list = testConfig.getLogValidation().getOrders();
+        if (list != null) {
+            while (list.size() > 0) {
+                var name = list.remove(0);
+                TestStatus testStatus = new TestStatus(name, "PENDING", "");
+                logger.info("adding test:{}", testStatus);
+                pendingTests.put(name, testStatus);
+            }
+        }
+        else {
+            logger.error("no heartbeat tests found");
+        }
+
+
         return pendingTests;
     }
 
@@ -158,7 +191,7 @@ public class ValidorConfig {
 
     @Bean
     public TestCollector testCollector(@NonNull final ReportService reportService,
-                                       @NonNull final HashMap<String, TestStatus> pendingTests) {
+                                       @NonNull final ConcurrentHashMap<String, TestStatus> pendingTests) {
         var collector = new TestCollector(
             reportService,
             pendingTests,

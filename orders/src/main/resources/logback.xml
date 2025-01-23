@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration debug="false">
+<configuration debug="true">
 
     <property name="LOG_FILE" value="${LOG_FILE:-/app/var/log/application.log}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL:-info}"/>
@@ -18,7 +18,10 @@
         </encoder>
     </appender>
 
-    <logger name="com.kagr.videos.jms.monitor" level="WARN"/>
+
+    <logger name="ch.qos.logback" level="OFF" additivity="true"/>
+    <logger name="org.springframework" level="OFF" additivity="true"/>
+    <logger name="com.kagr.videos.jms.monitor" level="WARN" additivity="true"/>
 
     <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE"/>

@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -51,6 +52,9 @@ public class OrdersConfig {
     @Value("${orders.topic}")
     private String ordersTopic;
 
+    @Value("${heartbeat.topic}")
+    private String heartbeatTopic;
+
     @Value("${spring.application.name}")
     private String appName;
 
@@ -60,14 +64,29 @@ public class OrdersConfig {
 
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
-        TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
-        ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
+        final TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
+        final ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
         connectionFactory.setBrokerURL(brokerAddress);
         connectionFactory.setUser(username);
         connectionFactory.setPassword(password);
         connectionFactory.setClientID(appName);
         logger.info("Creating ConnectionFactory for broker URL: {}, client-id:{}, username:{}", brokerAddress, appName, username);
-        return connectionFactory.createConnection();
+        final var connection = connectionFactory.createConnection();
+        connection.start();
+        return connection;
+    }
+
+
+
+
+
+    @Bean
+    public MessageConsumer heartbeatMessageConsumer(Session session, HeartbeatConsumer heartbeatConsumer) throws JMSException {
+        Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
+        logger.info("Creating MessageConsumer for HeartbeatConsumer on topic: {}", this.heartbeatTopic);
+        MessageConsumer consumer = session.createConsumer(heartbeatTopic);
+        consumer.setMessageListener(heartbeatConsumer);
+        return consumer;
     }
 
 
@@ -115,6 +134,7 @@ public class OrdersConfig {
             return new HashSet<>();
         }
 
+        jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
         return jmsConsumers;
     }
 
