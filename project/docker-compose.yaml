@@ -53,8 +53,8 @@ services:
 
 
   orders:
-    image: orders:latest
-    container_name: orders
+    image: order-generator:latest
+    container_name: order-generator
     networks:
       - autoqa
     depends_on:
@@ -64,7 +64,7 @@ services:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
       BROKER_PASSWORD: artemis
-      LOG_FILE: "/app/var/log/orders.log"
+      LOG_FILE: "/app/var/log/order-generator.log"
       LOG_LEVEL: "INFO"
       CLASSPATH: "/app/classes:/app/resources"
     ports:
@@ -77,8 +77,8 @@ services:
       retries: 3
     volumes:
       - logs:/app/var/log
-      - ../orders/target/classes/:/app/target/classes/:ro
-      - ../orders/src/main/resources/logback.xml:/app/resources/logback.xml:ro
+      - ../order-generator/target/classes/:/app/target/classes/:ro
+      - ../order-generator/src/main/resources/logback.xml:/app/resources/logback.xml:ro
 
 
 volumes:

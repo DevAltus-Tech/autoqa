@@ -27,7 +27,7 @@ broker:
 
 orders:
   topic: orders.topic
-  log: /app/var/log/orders.log
+  log: /app/var/log/order-generator.log
 
 heartbeat:
   topic: heartbeat.topic
@@ -47,11 +47,11 @@ tests:
     timeout: 60000
     shutdown-on-success: true
   jms-connect:
-    - orders
+    - order-generator
     - heartbeat
   log-validation:
     heartbeat:
       - "HEARTBEAT .* Sent heartbeat message.*"
     orders:
-      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat"
+      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
       - ".*ORDERS .* Heartbeat sequence.*"

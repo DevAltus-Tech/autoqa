@@ -1,4 +1,4 @@
-package com.kagr.videos.orderclient;
+package com.kagr.videos.ordergenerator;
 
 
 

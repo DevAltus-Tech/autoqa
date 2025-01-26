@@ -64,7 +64,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <mainClass>com.kagr.videos.orderclient.OrdersApplication</mainClass>
+                    <mainClass>com.kagr.videos.ordergenerator.OrdersMain</mainClass>
                 </configuration>
             </plugin>
             <plugin>

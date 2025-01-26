@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestCollector implements Runnable {
 
+    public static final String ORDER_GENERATOR = "order-generator";
+    public static final String HEARTBEAT = "heartbeat";
     private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final ConcurrentHashMap<String, TestStatus> completedTests;
     private final RestTemplate restTemplate;
@@ -168,7 +170,7 @@ public class TestCollector implements Runnable {
             });
             logReaders.clear();
             logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
-            int shutdownCount = sendShutdownCommand("orders");
+            int shutdownCount = sendShutdownCommand("order-generator");
             shutdownCount += sendShutdownCommand("heartbeat");
             logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
             if (shutdownCount == 2) {
@@ -215,8 +217,8 @@ public class TestCollector implements Runnable {
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
         logger.warn("Performing actions after termination timeout");
-        int shutdownCount = sendShutdownCommand("orders");
-        shutdownCount += sendShutdownCommand("heartbeat");
+        int shutdownCount = sendShutdownCommand(ORDER_GENERATOR);
+        shutdownCount += sendShutdownCommand(HEARTBEAT);
         for (var entry : pendingTests.entrySet()) {
             logger.error("Service shutdown successfull, marking test as failed: {}", entry.getKey());
             var test = entry.getValue();

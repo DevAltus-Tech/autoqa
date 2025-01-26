@@ -63,7 +63,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <mainClass>com.kagr.videos.orderclient.OrderClientApplication</mainClass>
+                    <mainClass>com.kagr.videos.orderclient.OrderClientMain</mainClass>
                 </configuration>
             </plugin>
             <plugin>

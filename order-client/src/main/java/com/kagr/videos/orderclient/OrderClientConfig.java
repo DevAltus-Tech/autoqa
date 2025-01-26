@@ -22,6 +22,7 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 import java.util.HashSet;
@@ -105,10 +106,10 @@ public class OrderClientConfig {
 
 
     @Bean
-    public MessageProducer ordersMessageProducer(Session session) throws JMSException {
-        Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
-        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
-        return session.createProducer(theTopic);
+    public MessageConsumer ordersMessageConsumer(Session session) throws JMSException {
+        Queue theQ = session.createQueue(ordersTopic);
+        logger.info("Creating {} OrderProducer for topic: {}", theQ, ordersTopic);
+        return session.createConsumer(theQ);
     }
 
 
