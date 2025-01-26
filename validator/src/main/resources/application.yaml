@@ -51,7 +51,7 @@ tests:
     - heartbeat
   log-validation:
     heartbeat:
-      - "HEARTBEAT .* Sent heartbeat XXX message.*"
+      - "HEARTBEAT .* Sent heartbeat message.*"
     orders:
-      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: XXXXX heartbeat"
+      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat"
       - ".*ORDERS .* Heartbeat sequence.*"

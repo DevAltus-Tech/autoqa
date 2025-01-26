@@ -12,11 +12,6 @@ management:
       exposure:
         include: "*"
 
-
-endpoint:
-    shutdown:
-      enabled: true
-
 server:
   error:
     whitelabel:
