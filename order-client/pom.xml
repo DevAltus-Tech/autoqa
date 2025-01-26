@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>com.kagr.videos</groupId>
-    <artifactId>orders</artifactId>
+    <artifactId>order-client</artifactId>
     <version>${orders.version}</version>
 
     <properties>
@@ -63,7 +63,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <mainClass>com.kagr.videos.orderclient.OrdersApplication</mainClass>
+                    <mainClass>com.kagr.videos.orderclient.OrderClientApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>

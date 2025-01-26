@@ -41,6 +41,7 @@ services:
       LOG_LEVEL: "INFO"
     ports:
       - "5006:5005"
+      - "8082:8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s
@@ -68,6 +69,7 @@ services:
       CLASSPATH: "/app/classes:/app/resources"
     ports:
       - "5007:5005"
+      - "8083:8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s

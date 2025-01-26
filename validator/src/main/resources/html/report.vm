@@ -58,29 +58,53 @@
     </style>
 </head>
 <body>
-    <h1 class="header">Report</h1>
+<h1 class="header">Report</h1>
 
-    <section>
-        <h2 class="header">Status Overview</h2>
-        <table>
+<section>
+    <h2 class="header">Pending Tests Overview</h2>
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Service</th>
+            <th>Notes</th>
+        </tr>
+        #foreach ($pTest in $pendingTests)
             <tr>
-                <th>Status</th>
-                <th>Service</th>
-                <th>Notes</th>
+                <td class="status-${pTest.status.toLowerCase()}">$pTest.status</td>
+                <td>$pTest.testName</td>
+                <td>$pTest.notes</td>
             </tr>
-            #foreach ($service in $services)
-            <tr>
-                <td class="status-${service.status.toLowerCase()}">$service.status</td>
-                <td>$service.testName</td>
-                <td>$service.notes</td>
-            </tr>
-            #end
-        </table>
-    </section>
+        #end
+    </table>
+</section>
 
-    <section>
-        <h2 class="header">Logs</h2>
-        <!-- Logs content goes here -->
-    </section>
+<section>
+    <h2 class="header">Completed Tests Overview</h2>
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Service</th>
+            <th>Notes</th>
+        </tr>
+        #foreach ($cTest in $completedTests)
+            <tr>
+                <td class="status-${cTest.status.toLowerCase()}">$cTest.status</td>
+                <td>$cTest.testName</td>
+                <td>$cTest.notes</td>
+            </tr>
+        #end
+    </table>
+</section>
+
+<section>
+    <h2 class="header">Logs</h2>
+    <table>
+        #foreach ($log in $logs)
+            <tr>
+                <td>$log</td>
+            </tr>
+        #end
+    </table>
+</section>
 </body>
 </html>

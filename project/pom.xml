@@ -23,6 +23,7 @@
     </developers>
     <modules>
         <module>../orders</module>
+        <module>../order-client</module>
         <module>../validator</module>
         <module>../jms-monitor</module>
         <module>../heartbeat</module>

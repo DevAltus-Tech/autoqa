@@ -4,6 +4,7 @@ package com.kagr.videos.validator.reports;
 
 
 
+import com.kagr.videos.validator.TestCollector;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,9 @@ public class ReportService {
 
     private final VelocityEngine velocityEngine;
     private final Template reportTemplate;
-    private final List<TestStatus> tests;
-    private final ConcurrentHashMap<String, TestStatus> pendingTests;
+    //private final List<TestStatus> tests;
+    private final List<String> logs;
+    private final TestCollector testCollector;
     private final TestStatus globalStatus = new TestStatus("Global Status", "PENDING", "");
 
 
@@ -42,11 +44,14 @@ public class ReportService {
     @GetMapping("generate")
     public String generateReport() {
         VelocityContext context = new VelocityContext();
-        tests.clear();
-        tests.addAll(pendingTests.values());
-        logger.info("generating report for {} tests", tests.size());
-        context.put("services", tests);
+        logs.clear();
+        logs.addAll(testCollector.getRelevantLogs());
+
+        //logger.info("generating report for {} tests", tests.size());
         context.put("globalStatus", globalStatus);
+        context.put("pendingTests", testCollector.getPendingTests().values());
+        context.put("completedTests", testCollector.getCompletedTests().values());
+        context.put("logs", logs);
 
 
 
@@ -58,15 +63,6 @@ public class ReportService {
 
 
 
-
-
-    public void addTest(@NonNull final TestStatus test) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} Adding test: {}", getClass().getSimpleName(), test);
-        }
-
-        tests.add(test);
-    }
 
 
 

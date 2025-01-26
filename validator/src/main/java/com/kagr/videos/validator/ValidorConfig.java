@@ -5,7 +5,6 @@ package com.kagr.videos.validator;
 
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
-import com.kagr.videos.validator.reports.ReportService;
 import com.kagr.videos.validator.reports.TestStatus;
 import lombok.Data;
 import lombok.NonNull;
@@ -25,11 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -178,11 +177,11 @@ public class ValidorConfig {
 
 
     @Bean
-    public Set<TestStatus> completedTests() {
+    public ConcurrentHashMap<String, TestStatus> completedTests() {
         if (logger.isTraceEnabled()) {
             logger.trace("ValidorConfig::completedTests");
         }
-        return new HashSet<>();
+        return new ConcurrentHashMap<>();
     }
 
 
@@ -190,11 +189,14 @@ public class ValidorConfig {
 
 
     @Bean
-    public TestCollector testCollector(@NonNull final ReportService reportService,
-                                       @NonNull final ConcurrentHashMap<String, TestStatus> pendingTests) {
+    public TestCollector testCollector(//@NonNull final ReportService reportService,
+                                       @NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
+                                       @NonNull final ConcurrentHashMap<String, TestStatus> completedTests,
+                                       @NonNull final RestTemplate restTemplate) {
         var collector = new TestCollector(
-            reportService,
             pendingTests,
+            completedTests,
+            restTemplate,
             ordersLog,
             heartbeatLog);
         new Thread(collector).start();
@@ -260,6 +262,13 @@ public class ValidorConfig {
         }
 
         return template;
+    }
+
+
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
 }

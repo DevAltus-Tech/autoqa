@@ -1,4 +1,4 @@
-package com.kagr.videos.orders;
+package com.kagr.videos.orderclient;
 
 
 
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 @Data
 @Configuration
 @ConfigurationProperties
-public class OrdersConfig {
+public class OrderClientConfig {
 
     private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
@@ -116,8 +116,8 @@ public class OrdersConfig {
 
 
     @Bean
-    public OrderProducer orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderProducer(ordersMessageProducer);
+    public OrderReceiver orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
+        var producer = new OrderReceiver(ordersMessageProducer);
         logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
         jmsConsumers.add(producer::handleJmsEvent);
         return producer;

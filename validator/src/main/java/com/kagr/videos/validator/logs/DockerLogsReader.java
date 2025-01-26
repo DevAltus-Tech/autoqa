@@ -44,7 +44,7 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
             logger.info("Starting to tail logger file: {}", loggerFileName);
 
             shouldContinue = true;
-            while (true) {
+            while (shouldContinue) {
                 file.seek(lastKnownPosition);
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -56,7 +56,7 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
                 Thread.sleep(100);
             }
 
-            //logger.warn("finished reading logger file: {}", loggerFileName);
+            logger.warn("finished reading logger file: {}", loggerFileName);
         }
         catch (IOException e) {
             logger.error("Error reading logger file", e);

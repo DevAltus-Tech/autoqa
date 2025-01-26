@@ -22,6 +22,7 @@ import java.util.List;
 public class TestConfig {
     private List<String> jmsConnect;
     private LogValidation logValidation;
+    private Termination terminationProperties;
 
 
 
@@ -34,4 +35,12 @@ public class TestConfig {
     }
 
 
+
+
+
+    @Data
+    public static class Termination {
+        private String timeout;
+        private boolean shutdownOnSuccess;
+    }
 }

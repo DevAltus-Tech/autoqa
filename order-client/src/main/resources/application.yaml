@@ -1,6 +1,6 @@
 spring:
   application:
-    name: orders
+    name: order-client
 
 management:
   endpoint:
