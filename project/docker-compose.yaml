@@ -1,6 +1,8 @@
 services:
   validator:
-    image: validator:latest
+    build:
+      context: ../validator
+      dockerfile: Dockerfile
     container_name: validator
     networks:
       - autoqa
@@ -13,20 +15,14 @@ services:
     ports:
       - "5005:5005"
       - "8081:8080"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 10s
-      timeout: 10s
-      retries: 3
     volumes:
       - logs:/app/var/log
-      - ../validator/target/classes/:/app/target/classes/:ro
-      - ../validator/src/main/resources/logback.xml:/app/resources/logback.xml:ro
-
 
 
   heartbeat:
-    image: heartbeat:latest
+    build:
+      context: ../heartbeat
+      dockerfile: Dockerfile
     container_name: heartbeat
     networks:
       - autoqa
@@ -48,12 +44,15 @@ services:
       timeout: 10s
       retries: 3
     volumes:
+      - ../reports:/app/var/reports
       - logs:/app/var/log
 
 
 
-  orders:
-    image: order-generator:latest
+  order-generator:
+    build:
+      context: ../order-generator
+      dockerfile: Dockerfile
     container_name: order-generator
     networks:
       - autoqa
@@ -77,8 +76,6 @@ services:
       retries: 3
     volumes:
       - logs:/app/var/log
-      - ../order-generator/target/classes/:/app/target/classes/:ro
-      - ../order-generator/src/main/resources/logback.xml:/app/resources/logback.xml:ro
 
 
 volumes:

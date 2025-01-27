@@ -35,8 +35,6 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestCollector implements Runnable {
 
-    public static final String ORDER_GENERATOR = "order-generator";
-    public static final String HEARTBEAT = "heartbeat";
     private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final ConcurrentHashMap<String, TestStatus> completedTests;
     private final RestTemplate restTemplate;
@@ -177,7 +175,6 @@ public class TestCollector implements Runnable {
                 logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
                 System.exit(0);
             }
-
         }
     }
 
@@ -217,8 +214,8 @@ public class TestCollector implements Runnable {
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
         logger.warn("Performing actions after termination timeout");
-        int shutdownCount = sendShutdownCommand(ORDER_GENERATOR);
-        shutdownCount += sendShutdownCommand(HEARTBEAT);
+        int shutdownCount = sendShutdownCommand(Defaults.ORDER_GENERATOR);
+        shutdownCount += sendShutdownCommand(Defaults.HEARTBEAT);
         for (var entry : pendingTests.entrySet()) {
             logger.error("Service shutdown successfull, marking test as failed: {}", entry.getKey());
             var test = entry.getValue();
@@ -227,12 +224,7 @@ public class TestCollector implements Runnable {
             completedTests.put(entry.getKey(), test);
         }
 
-        logger.warn("shutdown count: {}", shutdownCount);
-        if (shutdownCount == 2) {
-            logger.error("Not all external services shutdown");
-        }
-
-        System.exit(0);
+        checkForAndPerformTermination();
     }
 
 }

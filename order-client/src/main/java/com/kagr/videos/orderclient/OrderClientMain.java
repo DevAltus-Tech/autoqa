@@ -17,11 +17,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * package to pull in all relevant beans.
  */
 @SpringBootApplication(scanBasePackages = {"com.kagr.videos.orderclient"})
-public class OrderClientApplication
+public class OrderClientMain
 {
     public static void main(String[] args)
     {
-        SpringApplication app = new SpringApplication(OrderClientApplication.class);
+        SpringApplication app = new SpringApplication(OrderClientMain.class);
         app.setBannerMode(Banner.Mode.OFF);
         app.run(args);
     }

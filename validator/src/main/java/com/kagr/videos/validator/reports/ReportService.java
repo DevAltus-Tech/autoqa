@@ -13,12 +13,13 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 
@@ -54,8 +55,6 @@ public class ReportService {
         context.put("logs", logs);
 
 
-
-
         StringWriter writer = new StringWriter();
         reportTemplate.merge(context, writer);
         return writer.toString();
@@ -63,6 +62,19 @@ public class ReportService {
 
 
 
+
+
+    @PostMapping("report")
+    public void writeReport(@NonNull String filePostpend) {
+        String report = generateReport();
+        logger.info("writing report to file: {}", filePostpend);
+        try (FileOutputStream fos = new FileOutputStream("/app/var/reports/report-" + filePostpend + ".html")) {
+            fos.write(report.getBytes());
+        }
+        catch (Exception e) {
+            logger.error("Error writing report", e);
+        }
+    }
 
 
 
