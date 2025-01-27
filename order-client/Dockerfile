@@ -14,13 +14,14 @@ COPY src/main/resources/logback.xml /app/etc/
 COPY target/version.txt /app/etc/
 
 
-ENV JAVA_OPTS="-Xms256m -Xmx512m -Djava.awt.headless=true \
+# The java options
+ENV JAVA_OPTS="-Xms128m -Xmx256m -Djava.awt.headless=true \
     -Dlogback.configurationFile=/app/etc/logback.xml \
-    -Dspring.config.location=file:/app/etc/application.properties \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+EnableJVMCI \
-    -XX:+UseJVMCICompiler"
-ENV CLASSPATH="/app/lib/*"
+    -Dspring.config.location=file:/app/etc/application.yaml \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005"
+ENV CLASSPATH="/app/classes:/app/libs/*"
+
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-cp", "/app/classes:/app/libs/*", "com.kagr.videos.orderclient.OrderClientMain"]
+EXPOSE 5005
+ENTRYPOINT exec java $JAVA_OPTS -cp ${CLASSPATH} com.kagr.videos.orderclient.OrderClientMain
