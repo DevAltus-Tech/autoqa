@@ -64,16 +64,19 @@ public class ReportService {
 
 
 
-    @PostMapping("report")
-    public void writeReport(@NonNull String filePostpend) {
+    @PostMapping("write")
+    public String writeReport(@NonNull String filePostpend) {
         String report = generateReport();
-        logger.info("writing report to file: {}", filePostpend);
-        try (FileOutputStream fos = new FileOutputStream("/app/var/reports/report-" + filePostpend + ".html")) {
+        final var fname = "/app/var/reports/report-" + filePostpend + ".html";
+        logger.info("writing report to file, file: {}", fname);
+        try (FileOutputStream fos = new FileOutputStream(fname)) {
             fos.write(report.getBytes());
         }
         catch (Exception e) {
             logger.error("Error writing report", e);
         }
+
+        return fname;
     }
 
 

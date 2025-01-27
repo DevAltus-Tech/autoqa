@@ -9,17 +9,23 @@ import com.kagr.videos.validator.reports.TestStatus;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -67,12 +73,10 @@ public class TestCollector implements Runnable {
             logger.warn("Ignoring event:{}/{}", status, service);
         }
 
-
         logger.info("total pending tests: {}", pendingTests.size());
         pendingTests.forEach((k, v) -> {
             logger.info("...Pending test: {}", v);
         });
-
     }
 
 
@@ -167,16 +171,26 @@ public class TestCollector implements Runnable {
                 v.setShouldContinue(false);
             });
             logReaders.clear();
-            logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
+
+
             int shutdownCount = sendShutdownCommand("order-generator");
+            logger.info("shutdown count sent for order-generator: {}", shutdownCount);
             shutdownCount += sendShutdownCommand("heartbeat");
-            logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
-            if (shutdownCount == 2) {
-                logger.error("SHUTDOWN SHUTDOWN SHUTDOWN");
-                System.exit(0);
+            logger.info("shutdown count sent for heartbeat: {}", shutdownCount);
+
+
+            if (shutdownCount != 2) {
+                logger.error("Not all services were shutdown");
             }
+            else {
+                logger.info("All services were shutdown");
+            }
+
+            writeShutdownReport();
+            sendShutdownCommand("validator");
         }
     }
+
 
 
 
@@ -214,8 +228,6 @@ public class TestCollector implements Runnable {
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
         logger.warn("Performing actions after termination timeout");
-        int shutdownCount = sendShutdownCommand(Defaults.ORDER_GENERATOR);
-        shutdownCount += sendShutdownCommand(Defaults.HEARTBEAT);
         for (var entry : pendingTests.entrySet()) {
             logger.error("Service shutdown successfull, marking test as failed: {}", entry.getKey());
             var test = entry.getValue();
@@ -223,8 +235,35 @@ public class TestCollector implements Runnable {
             test.setNotes("Timeout");
             completedTests.put(entry.getKey(), test);
         }
-
+        pendingTests.clear();
         checkForAndPerformTermination();
+    }
+
+
+
+
+        public void writeShutdownReport() {
+        try {
+            final String url = "http://validator:8080/report/write";
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("filePostpend", Long.toString(System.currentTimeMillis()));
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            logger.info("Final report request sent to: {}, response: {}", url, response.getBody());
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Report written successfully:{}", response.getBody());
+            }
+            else {
+                logger.error("Failed to write report:{}", response);
+            }
+        }
+        catch (RestClientException ex) {
+            logger.error(ex.toString(), ex);
+        }
     }
 
 }

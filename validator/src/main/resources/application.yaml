@@ -4,8 +4,9 @@ spring:
 
 
 management:
-  server:
-    port: 8080
+  endpoint:
+    shutdown:
+      access: unrestricted
   endpoints:
     web:
       exposure:
@@ -14,7 +15,7 @@ management:
 server:
   error:
     whitelabel:
-      enabled: true  # Disable the default error response page
+      enabled: false  # Disable the default error response page
     include-message: always
     include-binding-errors: always
 
@@ -44,7 +45,7 @@ validator:
 
 tests:
   termination:
-    timeout: 60000
+    timeout: 20000
     shutdown-on-success: true
   jms-connect:
     - order-generator

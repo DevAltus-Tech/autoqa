@@ -17,6 +17,7 @@ services:
       - "8081:8080"
     volumes:
       - logs:/app/var/log
+      - ./reports:/app/var/reports
 
 
   heartbeat:
@@ -38,11 +39,6 @@ services:
     ports:
       - "5006:5005"
       - "8082:8080"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 3
     volumes:
       - ../reports:/app/var/reports
       - logs:/app/var/log
@@ -69,11 +65,6 @@ services:
     ports:
       - "5007:5005"
       - "8083:8080"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 3
     volumes:
       - logs:/app/var/log
 
