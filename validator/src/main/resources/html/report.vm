@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            margin: 20px;
+            color: #333;
+            background-color: #fff;
+            font-size: 12px;
+        }
+
+        .header {
+            background-color: #e9e9e9;
+            color: #333;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: normal;
+        }
+
+        .status-pass {
+            background-color: #4CAF50; /* Dark green for pass */
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            background-color: #F44336; /* Dark red for fail */
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1 class="header">Report</h1>
+
+<section>
+    <h2 class="header">Pending Tests Overview</h2>
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Service</th>
+            <th>Notes</th>
+        </tr>
+        #foreach ($pTest in $pendingTests)
+            <tr>
+                <td class="status-${pTest.status.toLowerCase()}">$pTest.status</td>
+                <td>$pTest.testName</td>
+                <td>$pTest.notes</td>
+            </tr>
+        #end
+    </table>
+</section>
+
+<section>
+    <h2 class="header">Completed Tests Overview</h2>
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Service</th>
+            <th>Notes</th>
+        </tr>
+        #foreach ($cTest in $completedTests)
+            <tr>
+                <td class="status-${cTest.status.toLowerCase()}">$cTest.status</td>
+                <td>$cTest.testName</td>
+                <td>$cTest.notes</td>
+            </tr>
+        #end
+    </table>
+</section>
+
+<section>
+    <h2 class="header">Logs</h2>
+    <table>
+        #foreach ($log in $logs)
+            <tr>
+                <td>$log</td>
+            </tr>
+        #end
+    </table>
+</section>
+</body>
+</html>

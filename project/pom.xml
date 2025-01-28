@@ -22,7 +22,8 @@
         <developer/>
     </developers>
     <modules>
-        <module>../orders</module>
+        <module>../order-generator</module>
+        <module>../order-client</module>
         <module>../validator</module>
         <module>../jms-monitor</module>
         <module>../heartbeat</module>
@@ -33,12 +34,21 @@
         <spring-boot.version>3.4.1</spring-boot.version>
         <lombok.version>1.18.30</lombok.version>
         <artemis.version>2.39.0</artemis.version>
+        <jms-monitor.version>0.1-SNAPSHOT</jms-monitor.version>
+        <validator.version>0.1-SNAPSHOT</validator.version>
+        <orders.version>0.1-SNAPSHOT</orders.version>
+        <heartbeat.version>0.1-SNAPSHOT</heartbeat.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
             <version>${spring-boot.version}</version>
         </dependency>
         <dependency>

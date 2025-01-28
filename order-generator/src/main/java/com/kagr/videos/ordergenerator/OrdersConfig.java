@@ -1,4 +1,4 @@
-package com.kagr.videos.heartbeat;
+package com.kagr.videos.ordergenerator;
 
 
 
@@ -6,6 +6,7 @@ package com.kagr.videos.heartbeat;
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
@@ -16,10 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -34,9 +35,11 @@ import java.util.function.BiConsumer;
 @Slf4j
 @Data
 @Configuration
-@EnableScheduling
 @ConfigurationProperties
-public class HearbeatConfig {
+public class OrdersConfig {
+
+    private final HashSet<BiConsumer<String, String>> jmsConsumers;
+
     @Value("${broker.url}")
     private String brokerAddress;
 
@@ -45,6 +48,9 @@ public class HearbeatConfig {
 
     @Value("${broker.password}")
     private String password;
+
+    @Value("${orders.topic}")
+    private String ordersTopic;
 
     @Value("${heartbeat.topic}")
     private String heartbeatTopic;
@@ -58,14 +64,29 @@ public class HearbeatConfig {
 
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
-        TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
-        ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
+        final TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
+        final ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
         connectionFactory.setBrokerURL(brokerAddress);
         connectionFactory.setUser(username);
         connectionFactory.setPassword(password);
         connectionFactory.setClientID(appName);
         logger.info("Creating ConnectionFactory for broker URL: {}, client-id:{}, username:{}", brokerAddress, appName, username);
-        return connectionFactory.createConnection();
+        final var connection = connectionFactory.createConnection();
+        connection.start();
+        return connection;
+    }
+
+
+
+
+
+    @Bean
+    public MessageConsumer heartbeatMessageConsumer(Session session, HeartbeatConsumer heartbeatConsumer) throws JMSException {
+        Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
+        logger.info("Creating MessageConsumer for HeartbeatConsumer on topic: {}", this.heartbeatTopic);
+        MessageConsumer consumer = session.createConsumer(heartbeatTopic);
+        consumer.setMessageListener(heartbeatConsumer);
+        return consumer;
     }
 
 
@@ -85,8 +106,8 @@ public class HearbeatConfig {
 
     @Bean
     public MessageProducer ordersMessageProducer(Session session) throws JMSException {
-        logger.info("Creating OrderProducer for topic: {}", heartbeatTopic);
-        Topic theTopic = ActiveMQJMSClient.createTopic(heartbeatTopic);
+        Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
+        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
         return session.createProducer(theTopic);
     }
 
@@ -95,8 +116,11 @@ public class HearbeatConfig {
 
 
     @Bean
-    public Set<BiConsumer<String, String>> consumers() {
-        return new HashSet<>();
+    public OrderProducer orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
+        var producer = new OrderProducer(ordersMessageProducer);
+        logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
+        jmsConsumers.add(producer::handleJmsEvent);
+        return producer;
     }
 
 
@@ -104,9 +128,24 @@ public class HearbeatConfig {
 
 
     @Bean
-    public ArtemisNotificationsListener artemisNotificationsListener(Connection jmsConnection, Set<BiConsumer<String, String>> consumers) throws JMSException {
-        logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
-        return new ArtemisNotificationsListener(jmsConnection, consumers).startListening();
+    public Set<BiConsumer<String, String>> consumers() {
+        if (jmsConsumers == null) {
+            logger.info("Creating empty set of consumers");
+            return new HashSet<>();
+        }
+
+        //jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
+        return jmsConsumers;
     }
 
+
+
+
+
+    @Bean
+    public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
+                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
+        logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
+        return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
+    }
 }

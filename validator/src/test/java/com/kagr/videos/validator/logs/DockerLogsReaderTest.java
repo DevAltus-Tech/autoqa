@@ -4,7 +4,7 @@ package com.kagr.videos.validator.logs;
 
 
 
-import com.kagr.videos.validator.loggers.DockerLogsReader;
+import com.kagr.videos.validator.logs.DockerLogsReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;
@@ -41,11 +41,11 @@ class DockerLogsReaderTest {
                     writer.flush();
                     Thread.sleep(sleepTime);
                 }
+            Thread.sleep(sleepTime);
             }
             catch (InterruptedException ex_) {
                 throw new RuntimeException(ex_);
             }
-
 
             assertEquals(10, logsRead.size());
         }

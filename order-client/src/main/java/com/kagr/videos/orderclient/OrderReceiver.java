@@ -1,4 +1,4 @@
-package com.kagr.videos.orders;
+package com.kagr.videos.orderclient;
 
 
 
@@ -19,7 +19,7 @@ import javax.jms.MessageProducer;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class OrderProducer {
+public class OrderReceiver {
     private final MessageProducer ordersMessageProducer;
 
 

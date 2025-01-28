@@ -1,4 +1,4 @@
-package com.kagr.videos.orders;
+package com.kagr.videos.orderclient;
 
 
 
@@ -20,7 +20,9 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 import java.util.HashSet;
@@ -35,7 +37,7 @@ import java.util.function.BiConsumer;
 @Data
 @Configuration
 @ConfigurationProperties
-public class OrdersConfig {
+public class OrderClientConfig {
 
     private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
@@ -51,6 +53,9 @@ public class OrdersConfig {
     @Value("${orders.topic}")
     private String ordersTopic;
 
+    @Value("${heartbeat.topic}")
+    private String heartbeatTopic;
+
     @Value("${spring.application.name}")
     private String appName;
 
@@ -60,14 +65,29 @@ public class OrdersConfig {
 
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
-        TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
-        ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
+        final TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
+        final ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
         connectionFactory.setBrokerURL(brokerAddress);
         connectionFactory.setUser(username);
         connectionFactory.setPassword(password);
         connectionFactory.setClientID(appName);
         logger.info("Creating ConnectionFactory for broker URL: {}, client-id:{}, username:{}", brokerAddress, appName, username);
-        return connectionFactory.createConnection();
+        final var connection = connectionFactory.createConnection();
+        connection.start();
+        return connection;
+    }
+
+
+
+
+
+    @Bean
+    public MessageConsumer heartbeatMessageConsumer(Session session, HeartbeatConsumer heartbeatConsumer) throws JMSException {
+        Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
+        logger.info("Creating MessageConsumer for HeartbeatConsumer on topic: {}", this.heartbeatTopic);
+        MessageConsumer consumer = session.createConsumer(heartbeatTopic);
+        consumer.setMessageListener(heartbeatConsumer);
+        return consumer;
     }
 
 
@@ -86,10 +106,10 @@ public class OrdersConfig {
 
 
     @Bean
-    public MessageProducer ordersMessageProducer(Session session) throws JMSException {
-        Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
-        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
-        return session.createProducer(theTopic);
+    public MessageConsumer ordersMessageConsumer(Session session) throws JMSException {
+        Queue theQ = session.createQueue(ordersTopic);
+        logger.info("Creating {} OrderProducer for topic: {}", theQ, ordersTopic);
+        return session.createConsumer(theQ);
     }
 
 
@@ -97,8 +117,8 @@ public class OrdersConfig {
 
 
     @Bean
-    public OrderProducer orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderProducer(ordersMessageProducer);
+    public OrderReceiver orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
+        var producer = new OrderReceiver(ordersMessageProducer);
         logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
         jmsConsumers.add(producer::handleJmsEvent);
         return producer;
@@ -115,6 +135,7 @@ public class OrdersConfig {
             return new HashSet<>();
         }
 
+        jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
         return jmsConsumers;
     }
 

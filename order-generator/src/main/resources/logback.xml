@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration debug="false">
+<configuration debug="true">
+
     <property name="LOG_FILE" value="${LOG_FILE:-/app/var/log/application.log}"/>
-    <property name="LOG_LEVEL" value="${LOG_LEVEL:-info}"/>
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-trace}"/>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_FILE}</file>
         <encoder>
-            <pattern>HEARTBEAT - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
+            <pattern>ORDERS - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <useJansi>true</useJansi>
         <encoder>
-            <pattern>HEARTBEAT - %d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) - %msg%n</pattern>
+            <pattern>ORDERS - %d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) - %msg%n</pattern>
         </encoder>
     </appender>
 
+
+    <logger name="ch.qos.logback" level="OFF" additivity="true"/>
+    <logger name="org.springframework" level="trace" additivity="true"/>
+    <logger name="com.kagr.videos.jms.monitor" level="WARN" additivity="true"/>
+
     <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

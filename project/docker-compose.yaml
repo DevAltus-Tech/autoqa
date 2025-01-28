@@ -1,49 +1,83 @@
 services:
+  validator:
+    build:
+      context: ../validator
+      dockerfile: Dockerfile
+    container_name: validator
+    networks:
+      - autoqa
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/validator.log"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "5005:5005"
+      - "8081:8080"
+    volumes:
+      - logs:/app/var/log
+      - ./reports:/app/var/reports
+
+
+
+  order-generator:
+    build:
+      context: ../order-generator
+      dockerfile: Dockerfile
+    container_name: order-generator
+    networks:
+      - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/order-generator.log"
+      LOG_LEVEL: "INFO"
+      CLASSPATH: "/app/classes:/app/resources"
+    ports:
+      - "5007:5005"
+      - "8083:8080"
+    volumes:
+      - logs:/app/var/log
 
   heartbeat:
-    image: heartbeat:latest
+    build:
+      context: ../heartbeat
+      dockerfile: Dockerfile
     container_name: heartbeat
     networks:
       - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
+      order-generator:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/heartbeat.log"
       LOG_LEVEL: "INFO"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 3
-    volumes:
-      - ./var/log:/app/var/log
-
-
-  orders:
-    image: orders:latest
-    container_name: orders
-    networks:
-      - autoqa
-    environment:
-      BROKER_URL: "tcp://broker:61616"
-      BROKER_USERNAME: artemis
-      BROKER_PASSWORD: artemis
-      LOG_FILE: "/app/var/log/orders.log"
-      LOG_LEVEL: "INFO"
     ports:
-      - "5005:5005"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 3
+      - "5006:5005"
+      - "8082:8080"
     volumes:
-      - ./var/log:/app/var/log
+      - ../reports:/app/var/reports
+      - logs:/app/var/log
+
+
 
 
 volumes:
-  orders_data:
+  logs:
+    driver: local
+    driver_opts:
+      type: 'tmpfs'
+      device: 'tmpfs'
 
 networks:
   autoqa:
