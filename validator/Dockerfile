@@ -25,7 +25,7 @@ ENV CLASSPATH="/app/classes:/app/libs/*"
 
 
 # ensure we have a healthcheck
-HEALTHCHECK --interval=10s --timeout=10s --retries=3 CMD curl -f http://localhost:8080/actuator/health || exit 1
+HEALTHCHECK --interval=1s --timeout=2s --retries=10 CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 
 # Make ports available to the world outside this container

@@ -20,8 +20,11 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -42,7 +45,7 @@ import java.util.function.BiConsumer;
 @Data
 @Configuration
 @ConfigurationProperties
-public class ValidorConfig {
+public class ValidorConfig implements ApplicationContextAware {
     private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
     @Value("${broker.url}")
@@ -71,6 +74,8 @@ public class ValidorConfig {
 
     @Value("${validator.output.report.template}")
     private String reportTemplate;
+
+    private ApplicationContext applicationContext;
 
 
 
@@ -189,8 +194,7 @@ public class ValidorConfig {
 
 
     @Bean
-    public TestCollector testCollector(//@NonNull final ReportService reportService,
-                                       @NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
+    public TestCollector testCollector(@NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
                                        @NonNull final ConcurrentHashMap<String, TestStatus> completedTests,
                                        @NonNull final RestTemplate restTemplate) {
         var collector = new TestCollector(
@@ -266,9 +270,19 @@ public class ValidorConfig {
 
 
 
+
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
+
+
+
+
+    @Override
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

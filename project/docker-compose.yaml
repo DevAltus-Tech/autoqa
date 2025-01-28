@@ -20,30 +20,6 @@ services:
       - ./reports:/app/var/reports
 
 
-  heartbeat:
-    build:
-      context: ../heartbeat
-      dockerfile: Dockerfile
-    container_name: heartbeat
-    networks:
-      - autoqa
-    depends_on:
-      validator:
-        condition: service_healthy
-    environment:
-      BROKER_URL: "tcp://broker:61616"
-      BROKER_USERNAME: artemis
-      BROKER_PASSWORD: artemis
-      LOG_FILE: "/app/var/log/heartbeat.log"
-      LOG_LEVEL: "INFO"
-    ports:
-      - "5006:5005"
-      - "8082:8080"
-    volumes:
-      - ../reports:/app/var/reports
-      - logs:/app/var/log
-
-
 
   order-generator:
     build:
@@ -67,6 +43,33 @@ services:
       - "8083:8080"
     volumes:
       - logs:/app/var/log
+
+  heartbeat:
+    build:
+      context: ../heartbeat
+      dockerfile: Dockerfile
+    container_name: heartbeat
+    networks:
+      - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
+      order-generator:
+        condition: service_healthy
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/heartbeat.log"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "5006:5005"
+      - "8082:8080"
+    volumes:
+      - ../reports:/app/var/reports
+      - logs:/app/var/log
+
+
 
 
 volumes:

@@ -9,7 +9,6 @@ import com.kagr.videos.validator.reports.TestStatus;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,6 +23,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.jms.Connection;
+import javax.jms.JMSException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -186,11 +187,14 @@ public class TestCollector implements Runnable {
                 logger.info("All services were shutdown");
             }
 
+
+
             writeShutdownReport();
-            sendShutdownCommand("validator");
+            //sendShutdownCommand("validator");
+            System.exit(0);
+
         }
     }
-
 
 
 
@@ -242,7 +246,8 @@ public class TestCollector implements Runnable {
 
 
 
-        public void writeShutdownReport() {
+
+    public void writeShutdownReport() {
         try {
             final String url = "http://validator:8080/report/write";
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();

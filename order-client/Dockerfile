@@ -22,6 +22,8 @@ ENV JAVA_OPTS="-Xms128m -Xmx256m -Djava.awt.headless=true \
 ENV CLASSPATH="/app/classes:/app/libs/*"
 
 
+HEALTHCHECK --interval=1s --timeout=2s --retries=10 CMD curl -f http://localhost:8080/actuator/health || exit 1
+
 EXPOSE 8080
 EXPOSE 5005
 ENTRYPOINT exec java $JAVA_OPTS -cp ${CLASSPATH} com.kagr.videos.orderclient.OrderClientMain

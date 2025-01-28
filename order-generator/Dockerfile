@@ -9,7 +9,7 @@ WORKDIR /app
 
 
 # Copy the current directory contents into the container at /app
-COPY target/classes /app/classes
+COPY target/*.jar /app/libs/order-generator.jar
 COPY target/libs/* /app/libs/
 COPY src/main/resources/application.yaml /app/etc/
 COPY src/main/resources/logback.xml /app/etc/
@@ -26,8 +26,8 @@ ENV CLASSPATH="/app/classes:/app/libs/*"
 
 
 # ensure we have a healthcheck
-HEALTHCHECK --interval=10s --timeout=10s --retries=3 CMD curl -f http://localhost:8080/actuator/health || exit 1
+HEALTHCHECK --interval=1s --timeout=2s --retries=10 CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 EXPOSE 8080
 EXPOSE 5005
-ENTRYPOINT exec java $JAVA_OPTS -cp ${CLASSPATH} com.kagr.videos.ordergenerator.OrdersMain
+ENTRYPOINT exec java $JAVA_OPTS -jar /app/libs/order-generator.jar

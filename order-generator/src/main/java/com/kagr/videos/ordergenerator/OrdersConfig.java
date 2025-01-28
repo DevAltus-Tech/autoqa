@@ -134,7 +134,7 @@ public class OrdersConfig {
             return new HashSet<>();
         }
 
-        jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
+        //jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
         return jmsConsumers;
     }
 

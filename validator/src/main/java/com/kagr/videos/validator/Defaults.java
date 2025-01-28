@@ -10,4 +10,6 @@ public class Defaults {
     public static final String HEARTBEAT = "heartbeat";
     public static final String ORDERS = "order-generator";
     public static final String ORDER_GENERATOR = "order-generator";
+    public static final CharSequence SESSION_CLOSED = "SESSION_CLOSED";
+    public static final CharSequence VALIDATOR = "validator";
 }

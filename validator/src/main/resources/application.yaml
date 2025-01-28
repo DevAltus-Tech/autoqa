@@ -45,7 +45,7 @@ validator:
 
 tests:
   termination:
-    timeout: 20000
+    timeout: 40000
     shutdown-on-success: true
   jms-connect:
     - order-generator
