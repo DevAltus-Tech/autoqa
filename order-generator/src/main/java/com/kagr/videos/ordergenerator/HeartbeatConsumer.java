@@ -40,4 +40,7 @@ public class HeartbeatConsumer implements MessageListener {
             logger.error("Error processing JMS message", e);
         }
     }
+
+
+
 }

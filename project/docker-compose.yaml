@@ -19,6 +19,29 @@ services:
       - logs:/app/var/log
       - ./reports:/app/var/reports
 
+  config-gateway:
+    build:
+      context: ../config-gateway
+      dockerfile: Dockerfile
+    container_name: config-gateway
+    networks:
+      - autoqa
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/config-gateway.log"
+      LOG_LEVEL: "INFO"
+      CFG_TOPIC: com.kagr.config
+    #depends_on:
+    #  validator:
+    #    condition: service_healthy
+    ports:
+      - "5008:5005"
+      - "8084:8080"
+    volumes:
+      - logs:/app/var/log
+
 
 
   order-generator:
@@ -38,6 +61,7 @@ services:
       LOG_FILE: "/app/var/log/order-generator.log"
       LOG_LEVEL: "INFO"
       CLASSPATH: "/app/classes:/app/resources"
+      CFG_TOPIC: properties
     ports:
       - "5007:5005"
       - "8083:8080"
@@ -56,12 +80,15 @@ services:
         condition: service_healthy
       order-generator:
         condition: service_healthy
+      config-gateway:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/heartbeat.log"
       LOG_LEVEL: "INFO"
+      CFG_TOPIC: com.kagr.config
     ports:
       - "5006:5005"
       - "8082:8080"

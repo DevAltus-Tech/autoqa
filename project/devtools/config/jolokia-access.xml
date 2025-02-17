@@ -1,12 +1,31 @@
 <!-- The namespace is important for newer Jolokia versions -->
 <restrictor xmlns="http://www.jolokia.org/xml/ns/jolokia">
 
-  <cors>
-    <!-- Allow requests from any Origin.  -->
-    <allow-origin>.*</allow-origin>
+    <cors>
+        <!-- Allow requests from any Origin.  -->
+        <allow-origin>.*</allow-origin>
 
-    <!-- Relax strict checking so it's less picky about the actual values -->
-    <strict-checking>false</strict-checking>
-  </cors>
+        <!-- Relax strict checking so it's less picky about the actual values -->
+        <strict-checking>false</strict-checking>
+    </cors>
+
+
+    <rules>
+        <!-- Allow all requests from localhost -->
+        <rule>
+            <allow>
+                <host>
+                    <hostName>.*</hostName>
+                </host>
+            </allow>
+        </rule>
+        <!-- Allow requests with admin/admin credentials -->
+        <rule>
+            <allow>
+                <user>admin</user>
+                <password>admin</password>
+            </allow>
+        </rule>
+    </rules>
 
 </restrictor>

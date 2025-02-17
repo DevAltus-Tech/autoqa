@@ -22,6 +22,7 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 import java.util.HashSet;
@@ -55,6 +56,12 @@ public class OrdersConfig {
     @Value("${heartbeat.topic}")
     private String heartbeatTopic;
 
+    @Value("${config.gateway.topic}")
+    private String configGatewayTopic;
+
+    @Value("${config.gateway.filter}")
+    private String configGatewayFilter;
+
     @Value("${spring.application.name}")
     private String appName;
 
@@ -81,10 +88,25 @@ public class OrdersConfig {
 
 
     @Bean
-    public MessageConsumer heartbeatMessageConsumer(Session session, HeartbeatConsumer heartbeatConsumer) throws JMSException {
-        Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
+    public MessageConsumer configPropertiesQueueConsumer(Connection connection, ConfigGatewayConsumer configGatewayConsumer) throws JMSException {
+        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Queue configPropertiesQueue = session.createQueue(configGatewayTopic);
+        logger.info("Creating MessageConsumer for ConfigGatewayConsumer on queue: {}", configGatewayTopic);
+        final MessageConsumer consumer = session.createConsumer(configPropertiesQueue);
+        consumer.setMessageListener(configGatewayConsumer);
+        return consumer;
+    }
+
+
+
+
+
+    @Bean
+    public MessageConsumer heartbeatMessageConsumer(Connection connection, HeartbeatConsumer heartbeatConsumer) throws JMSException {
+        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
         logger.info("Creating MessageConsumer for HeartbeatConsumer on topic: {}", this.heartbeatTopic);
-        MessageConsumer consumer = session.createConsumer(heartbeatTopic);
+        final MessageConsumer consumer = session.createConsumer(heartbeatTopic);
         consumer.setMessageListener(heartbeatConsumer);
         return consumer;
     }
@@ -94,19 +116,9 @@ public class OrdersConfig {
 
 
     @Bean
-    public Session jmsSession(Connection connection) throws JMSException {
-        logger.info("Creating Session for connection: {}", connection);
-        Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-        return session;
-    }
-
-
-
-
-
-    @Bean
-    public MessageProducer ordersMessageProducer(Session session) throws JMSException {
-        Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
+    public MessageProducer ordersMessageProducer(Connection connection) throws JMSException {
+        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
         logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
         return session.createProducer(theTopic);
     }

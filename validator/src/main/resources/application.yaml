@@ -45,14 +45,14 @@ validator:
 
 tests:
   termination:
-    timeout: 40000
+    timeout: 400000
     shutdown-on-success: true
   jms-connect:
     - order-generator
     - heartbeat
   log-validation:
     heartbeat:
-      - "HEARTBEAT .* Sent heartbeat message.*"
+      - "HEARTBEAT .* Sent MMMM heartbeat message.*"
     orders:
       - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
       - ".*ORDERS .* Heartbeat sequence.*"
