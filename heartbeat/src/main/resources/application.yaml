@@ -30,3 +30,4 @@ orders:
 
 heartbeat:
   topic: heartbeat.topic
+  cfgTopic: com.kagr.config.properties

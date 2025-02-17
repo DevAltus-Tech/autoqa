@@ -256,6 +256,11 @@ under the License.
                 </anycast>
             </address>
 
+            <address name="com.kagr.config">
+                <multicast>
+                    <queue name="properties" last-value-key="key" non-destructive="true"/>
+                </multicast>
+            </address>
         </addresses>
 
 

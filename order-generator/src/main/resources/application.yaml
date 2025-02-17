@@ -35,3 +35,8 @@ orders:
 
 heartbeat:
   topic: heartbeat.topic
+
+config:
+  gateway:
+    topic:  ${CFG_TOPIC:com.kagr.config}
+    filter: filter1
