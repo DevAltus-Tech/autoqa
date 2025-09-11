@@ -276,7 +276,7 @@ public class ValidatorConfig implements ApplicationContextAware {
             logger.error("Error getting report template", ex_);
         }
 
-        return template;
+        return null;
     }
 
 

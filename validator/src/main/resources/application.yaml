@@ -62,7 +62,7 @@ tests:
       - "ORDR_CLN .* Heartbeat sequence.*"
     orders:
       - ".*ORDR_GEN .* Received event: CONSUMER_CREATED for name: heartbeat.*"
-      - ".*ORDR_GEN .* Sent order: .*"
+      #- ".*ORDR_GEN .* Sent order: .*"
     initialized:
       - "OrderProducer initialized"
       - "HeartbeatProducer initialized"

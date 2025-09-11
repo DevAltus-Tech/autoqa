@@ -9,6 +9,7 @@ import com.kagr.videos.validator.reports.TestStatus;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
@@ -49,6 +50,7 @@ public class TestCollector implements Runnable {
     private final HashMap<String, DockerLogsReader> logReaders = new HashMap<>();
     private final LinkedBlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
     private final LinkedBlockingQueue<String> relevantLogs = new LinkedBlockingQueue<>();
+    private final HashSet<String> services = new HashSet<>();
 
 
 
@@ -56,7 +58,6 @@ public class TestCollector implements Runnable {
 
     public void handleJmsEvent(String status, String service) {
         logger.warn("{}/{}", status, service);
-
         if (StringUtils.equals(Defaults.CONSUMER_CREATED, status)) {
             var name = service + Defaults.DEFAULT_CONNECT;
             var actual = pendingTests.remove(name);
@@ -66,6 +67,7 @@ public class TestCollector implements Runnable {
                 actual.setNotes("Consumer created successfully");
                 completedTests.put(name, actual);
                 startLogListener(service);
+                services.add(service);
             }
         }
         else {
@@ -175,15 +177,14 @@ public class TestCollector implements Runnable {
             logReaders.clear();
 
 
-            int shutdownCount = sendShutdownCommand("order-generator");
-            logger.info("shutdown count sent for order-generator: {}", shutdownCount);
-            shutdownCount = sendShutdownCommand("order-client");
-            logger.info("shutdown count sent for order-client: {}", shutdownCount);
-            shutdownCount += sendShutdownCommand("heartbeat");
-            logger.info("shutdown count sent for heartbeat: {}", shutdownCount);
+            int shutdownCount = 0;
+            for (String service : services) {
+                logger.info("shutting down service: {}", service);
+                shutdownCount = sendShutdownCommand(service);
+            }
 
 
-            if (shutdownCount != 2) {
+            if (shutdownCount != services.size()) {
                 logger.error("Not all services were shutdown");
             }
             else {
@@ -200,10 +201,9 @@ public class TestCollector implements Runnable {
 
 
 
-
-
     private int sendShutdownCommand(final String serviceName) {
         String url = "http://" + serviceName + ":8080/actuator/shutdown";
+        logger.warn("Sending shutdown command to: {}", url);
 
         try {
             RequestEntity<Void> request =
