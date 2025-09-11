@@ -5,6 +5,15 @@ package com.kagr.videos.orderclient;
 
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.Topic;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 
 
@@ -117,18 +115,6 @@ public class OrderClientConfig {
 
 
     @Bean
-    public OrderReceiver orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderReceiver(ordersMessageProducer);
-        logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
-        jmsConsumers.add(producer::handleJmsEvent);
-        return producer;
-    }
-
-
-
-
-
-    @Bean
     public Set<BiConsumer<String, String>> consumers() {
         if (jmsConsumers == null) {
             logger.info("Creating empty set of consumers");
@@ -145,7 +131,7 @@ public class OrderClientConfig {
 
     @Bean
     public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
+        @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
         logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
         return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
     }

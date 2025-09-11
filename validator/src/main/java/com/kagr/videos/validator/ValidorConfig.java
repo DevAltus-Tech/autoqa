@@ -57,14 +57,17 @@ public class ValidorConfig implements ApplicationContextAware {
     @Value("${broker.password}")
     private String password;
 
-    @Value("${orders.topic}")
+    @Value("${orders-generator.topic}")
     private String ordersTopic;
 
     @Value("${heartbeat.topic}")
     private String heartbeatTopic;
 
-    @Value("${orders.log}")
-    private String ordersLog;
+    @Value("${orders-generator.log}")
+    private String ordersGeneratorLog;
+
+    @Value("${orders-client.log}")
+    private String ordersClientLog;
 
     @Value("${heartbeat.log}")
     private String heartbeatLog;
@@ -110,8 +113,8 @@ public class ValidorConfig implements ApplicationContextAware {
 
     @Bean
     public String ordersLog() {
-        logger.debug("ordersLog:{}", ordersLog);
-        return ordersLog;
+        logger.debug("ordersLog:{}", ordersGeneratorLog);
+        return ordersGeneratorLog;
     }
 
 
@@ -201,7 +204,7 @@ public class ValidorConfig implements ApplicationContextAware {
             pendingTests,
             completedTests,
             restTemplate,
-            ordersLog,
+            ordersGeneratorLog,
             heartbeatLog);
         new Thread(collector).start();
         return collector;

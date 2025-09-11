@@ -88,20 +88,6 @@ public class OrdersConfig {
 
 
     @Bean
-    public MessageConsumer configPropertiesQueueConsumer(Connection connection, ConfigGatewayConsumer configGatewayConsumer) throws JMSException {
-        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        final Queue configPropertiesQueue = session.createQueue(configGatewayTopic);
-        logger.info("Creating MessageConsumer for ConfigGatewayConsumer on queue: {}", configGatewayTopic);
-        final MessageConsumer consumer = session.createConsumer(configPropertiesQueue);
-        consumer.setMessageListener(configGatewayConsumer);
-        return consumer;
-    }
-
-
-
-
-
-    @Bean
     public MessageConsumer heartbeatMessageConsumer(Connection connection, HeartbeatConsumer heartbeatConsumer) throws JMSException {
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);

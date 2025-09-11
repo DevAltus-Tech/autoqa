@@ -11,12 +11,11 @@
     </parent>
 
     <groupId>com.kagr.videos</groupId>
-    <artifactId>order-client</artifactId>
+    <artifactId>config-gateway</artifactId>
     <version>${orders.version}</version>
-    <name>${artifactId}</name>
 
     <properties>
-        <lang3.version>3.12.0</lang3.version>
+        <lang3.version>3.17.0</lang3.version>
     </properties>
 
 
@@ -30,7 +29,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.17.0</version>
+            <version>${lang3.version}</version>
         </dependency>
 
     </dependencies>
@@ -52,19 +51,6 @@
                             <artifactId>spring-boot-configuration-processor</artifactId>
                         </path>
                     </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                    <mainClass>com.kagr.videos.orderclient.OrderClientMain</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -104,6 +90,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

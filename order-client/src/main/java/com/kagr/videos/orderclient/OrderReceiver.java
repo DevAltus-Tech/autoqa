@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.jms.MessageProducer;
-
 
 
 
@@ -20,8 +18,6 @@ import javax.jms.MessageProducer;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderReceiver {
-    private final MessageProducer ordersMessageProducer;
-
 
 
 
@@ -38,6 +34,4 @@ public class OrderReceiver {
     public void handleJmsEvent(String event, String name) {
         logger.warn("Received event: {} for name: {}", event, name);
     }
-
-
 }

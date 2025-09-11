@@ -14,7 +14,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <useJansi>true</useJansi>
         <encoder>
-            <pattern>RDER_GEN - %d{yyyy-MM-dd HH:mm:ss} [%t] %highlight(%-5level) - %msg%n</pattern>
+            <pattern>ORDR_GEN - %d{yyyy-MM-dd HH:mm:ss} [%t] %highlight(%-5level) - %msg%n</pattern>
         </encoder>
     </appender>
 

@@ -26,9 +26,13 @@ broker:
   password: admin
 
 
-orders:
+orders-generator:
   topic: orders.topic
   log: /app/var/log/order-generator.log
+
+orders-client:
+  topic: orders.topic
+  log: /app/var/log/order-client.log
 
 heartbeat:
   topic: heartbeat.topic
@@ -45,14 +49,20 @@ validator:
 
 tests:
   termination:
-    timeout: 400000
+    timeout: 15000  # in milliseconds
     shutdown-on-success: true
   jms-connect:
     - order-generator
     - heartbeat
+    - order-consumer
   log-validation:
     heartbeat:
-      - "HEARTBEAT .* Sent MMMM heartbeat message.*"
+      - "HEARTBEAT .* Sent heartbeat message.*"
+      - "ORDR_GEN .* Heartbeat sequence.*"
+      - "ORDR_CLN .* Heartbeat sequence.*"
     orders:
-      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
-      - ".*ORDERS .* Heartbeat sequence.*"
+      - ".*ORDR_GEN .* Received event: CONSUMER_CREATED for name: heartbeat.*"
+      - ".*ORDR_GEN .* Sent order: .*"
+    initialized:
+      - "OrderProducer initialized"
+      - "HeartbeatProducer initialized"
