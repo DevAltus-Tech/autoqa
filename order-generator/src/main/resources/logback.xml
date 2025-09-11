@@ -7,7 +7,7 @@
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_FILE}</file>
         <encoder>
-            <pattern>ORDERS - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
+            <pattern>ORDR_GEN - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
         </encoder>
     </appender>
 

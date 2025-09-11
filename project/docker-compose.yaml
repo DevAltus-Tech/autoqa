@@ -20,6 +20,31 @@ services:
       - ./reports:/app/var/reports
 
 
+  order-client:
+    build:
+      context: ../order-client
+      dockerfile: Dockerfile
+    container_name: order-client
+    networks:
+      - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
+      #order-generator:
+      #  condition: service_healthy
+    environment:
+      BROKER_URL: "tcp://broker:61616"
+      BROKER_USERNAME: artemis
+      BROKER_PASSWORD: artemis
+      LOG_FILE: "/app/var/log/order-client.log"
+      LOG_LEVEL: "INFO"
+      CLASSPATH: "/app/classes:/app/resources"
+      CFG_TOPIC: properties
+    ports:
+      - "5008:5005"
+      - "8084:8080"
+    volumes:
+      - logs:/app/var/log
 
   order-generator:
     build:
@@ -45,31 +70,6 @@ services:
     volumes:
       - logs:/app/var/log
 
-  order-client:
-    build:
-      context: ../order-client
-      dockerfile: Dockerfile
-    container_name: order-client
-    networks:
-      - autoqa
-    depends_on:
-      validator:
-        condition: service_healthy
-      order-generator:
-        condition: service_healthy
-    environment:
-      BROKER_URL: "tcp://broker:61616"
-      BROKER_USERNAME: artemis
-      BROKER_PASSWORD: artemis
-      LOG_FILE: "/app/var/log/order-client.log"
-      LOG_LEVEL: "INFO"
-      CLASSPATH: "/app/classes:/app/resources"
-      CFG_TOPIC: properties
-    ports:
-      - "5008:5005"
-      - "8084:8080"
-    volumes:
-      - logs:/app/var/log
 
   heartbeat:
     build:
@@ -96,6 +96,7 @@ services:
     volumes:
       - ../reports:/app/var/reports
       - logs:/app/var/log
+
 
 
 

@@ -6,6 +6,12 @@ package com.kagr.videos.validator;
 
 import com.kagr.videos.validator.logs.DockerLogsReader;
 import com.kagr.videos.validator.reports.TestStatus;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +29,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Pattern;
-
 
 
 
@@ -45,7 +42,8 @@ public class TestCollector implements Runnable {
     private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final ConcurrentHashMap<String, TestStatus> completedTests;
     private final RestTemplate restTemplate;
-    private final String ordersLog;
+    private final String ordersGeneratorLog;
+    private final String ordersClientLog;
     private final String heartbeatLog;
 
     private final HashMap<String, DockerLogsReader> logReaders = new HashMap<>();
@@ -84,15 +82,18 @@ public class TestCollector implements Runnable {
 
 
 
-    private void startLogListener(final String name) {
+    private void startLogListener(String name) {
         if (logger.isTraceEnabled()) {
             logger.trace("Starting log listener for: {}", name);
         }
         if (StringUtils.equalsIgnoreCase(name, Defaults.HEARTBEAT)) {
             startLogReader(heartbeatLog);
         }
-        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDERS)) {
-            startLogReader(ordersLog);
+        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDER_GENERATOR)) {
+            startLogReader(ordersGeneratorLog);
+        }
+        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDER_CLIENT)) {
+            startLogReader(ordersClientLog);
         }
         else {
             logger.error("Unknown service: {}", name);
@@ -176,6 +177,8 @@ public class TestCollector implements Runnable {
 
             int shutdownCount = sendShutdownCommand("order-generator");
             logger.info("shutdown count sent for order-generator: {}", shutdownCount);
+            shutdownCount = sendShutdownCommand("order-client");
+            logger.info("shutdown count sent for order-client: {}", shutdownCount);
             shutdownCount += sendShutdownCommand("heartbeat");
             logger.info("shutdown count sent for heartbeat: {}", shutdownCount);
 
@@ -186,7 +189,6 @@ public class TestCollector implements Runnable {
             else {
                 logger.info("All services were shutdown");
             }
-
 
 
             writeShutdownReport();
@@ -206,9 +208,9 @@ public class TestCollector implements Runnable {
         try {
             RequestEntity<Void> request =
                 RequestEntity.post(URI.create(url))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                    .build();
+                             .contentType(MediaType.APPLICATION_JSON)
+                             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                             .build();
             ResponseEntity<String> response = restTemplate.exchange(request, String.class);
             logger.info("Shutdown command sent for service: {}, response:{}", serviceName, response);
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -224,28 +226,6 @@ public class TestCollector implements Runnable {
 
         return 0;
     }
-
-
-
-
-
-    @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
-    public void performPostTimeoutActions() {
-        logger.warn("Performing actions after termination timeout");
-        for (var entry : pendingTests.entrySet()) {
-            logger.error("Service shutdown successfull, marking test as failed: {}", entry.getKey());
-            var test = entry.getValue();
-            test.setStatus("FAIL");
-            test.setNotes("Timeout");
-            completedTests.put(entry.getKey(), test);
-        }
-        pendingTests.clear();
-        checkForAndPerformTermination();
-    }
-
-
-
-
 
     public void writeShutdownReport() {
         try {
@@ -269,6 +249,20 @@ public class TestCollector implements Runnable {
         catch (RestClientException ex) {
             logger.error(ex.toString(), ex);
         }
+    }
+
+    @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
+    public void performPostTimeoutActions() {
+        logger.warn("Performing actions after termination timeout");
+        for (var entry : pendingTests.entrySet()) {
+            logger.error("Service shutdown successfully, marking test as failed: {}", entry.getKey());
+            var test = entry.getValue();
+            test.setStatus("FAIL");
+            test.setNotes("Timeout");
+            completedTests.put(entry.getKey(), test);
+        }
+        pendingTests.clear();
+        checkForAndPerformTermination();
     }
 
 }

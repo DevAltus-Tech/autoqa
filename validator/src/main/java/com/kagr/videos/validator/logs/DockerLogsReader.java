@@ -59,7 +59,7 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
             logger.warn("finished reading logger file: {}", loggerFileName);
         }
         catch (IOException e) {
-            logger.error("Error reading logger file", e);
+            logger.error("Error reading logger file, name:{}, error:{}", loggerFileName, e.toString());
         }
         catch (InterruptedException e) {
             logger.warn("logger reading interrupted", e);

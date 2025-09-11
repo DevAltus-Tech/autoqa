@@ -54,7 +54,7 @@ tests:
   jms-connect:
     - order-generator
     - heartbeat
-    - order-consumer
+    - order-client
   log-validation:
     heartbeat:
       - "HEARTBEAT .* Sent heartbeat message.*"

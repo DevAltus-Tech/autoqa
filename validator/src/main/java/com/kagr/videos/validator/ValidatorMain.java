@@ -26,7 +26,7 @@ import java.util.Random;
 @Slf4j
 @SpringBootApplication(scanBasePackages = {"com.kagr.videos.validator"})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@EnableConfigurationProperties({TestConfig.class, ValidorConfig.class})
+@EnableConfigurationProperties({TestConfig.class, ValidatorConfig.class})
 public class ValidatorMain {
 
     public final Template reportTemplate;

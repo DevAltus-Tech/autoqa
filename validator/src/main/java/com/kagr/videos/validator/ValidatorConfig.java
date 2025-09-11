@@ -6,6 +6,13 @@ package com.kagr.videos.validator;
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
 import com.kagr.videos.validator.reports.TestStatus;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Session;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +36,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
-
 
 
 
@@ -45,7 +44,7 @@ import java.util.function.BiConsumer;
 @Data
 @Configuration
 @ConfigurationProperties
-public class ValidorConfig implements ApplicationContextAware {
+public class ValidatorConfig implements ApplicationContextAware {
     private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
     @Value("${broker.url}")
@@ -112,9 +111,17 @@ public class ValidorConfig implements ApplicationContextAware {
 
 
     @Bean
-    public String ordersLog() {
-        logger.debug("ordersLog:{}", ordersGeneratorLog);
+    public String ordersGeneratorLog() {
+        logger.debug("ordersGeneratorLog:{}", ordersGeneratorLog);
         return ordersGeneratorLog;
+    }
+
+
+
+    @Bean
+    public String ordersClientLog() {
+        logger.debug("ordersClientLog:{}", ordersClientLog);
+        return ordersClientLog;
     }
 
 
@@ -162,7 +169,7 @@ public class ValidorConfig implements ApplicationContextAware {
             logger.error("no heartbeat tests found");
         }
 
-        logger.info("adding heart-beat tests");
+        logger.info("adding order tests");
         list = testConfig.getLogValidation().getOrders();
         if (list != null) {
             while (list.size() > 0) {
@@ -173,7 +180,7 @@ public class ValidorConfig implements ApplicationContextAware {
             }
         }
         else {
-            logger.error("no heartbeat tests found");
+            logger.error("no order tests found");
         }
 
 
@@ -198,13 +205,14 @@ public class ValidorConfig implements ApplicationContextAware {
 
     @Bean
     public TestCollector testCollector(@NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
-                                       @NonNull final ConcurrentHashMap<String, TestStatus> completedTests,
-                                       @NonNull final RestTemplate restTemplate) {
+        @NonNull final ConcurrentHashMap<String, TestStatus> completedTests,
+        @NonNull final RestTemplate restTemplate) {
         var collector = new TestCollector(
             pendingTests,
             completedTests,
             restTemplate,
             ordersGeneratorLog,
+            ordersClientLog,
             heartbeatLog);
         new Thread(collector).start();
         return collector;
@@ -230,7 +238,7 @@ public class ValidorConfig implements ApplicationContextAware {
 
     @Bean
     public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
+        @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
         logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
         return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
     }

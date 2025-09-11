@@ -77,6 +77,13 @@ public class OrderClientConfig {
 
 
 
+    @Bean
+    public HeartbeatConsumer heartbeatConsumer() {
+        return new HeartbeatConsumer();
+    }
+
+
+
 
 
     @Bean
