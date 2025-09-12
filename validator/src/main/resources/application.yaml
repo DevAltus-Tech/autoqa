@@ -43,6 +43,7 @@ validator:
   output:
     report:
       template: /html/report.vm
+      writeReportUrl: http://validator:8080/report/write
 
 
 
@@ -61,8 +62,8 @@ tests:
       - "ORDR_GEN .* Heartbeat sequence.*"
       - "ORDR_CLN .* Heartbeat sequence.*"
     orders:
-      - ".*ORDR_GEN .* Received event: CONSUMER_CREATED for name: heartbeat.*"
-      #- ".*ORDR_GEN .* Sent order: .*"
+      - "ORDR_GEN .* Sent order message.*"
+      - "ORDR_CLN .* Received JMS event: OrderID:1.*"
     initialized:
       - "OrderProducer initialized"
       - "HeartbeatProducer initialized"

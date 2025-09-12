@@ -77,6 +77,9 @@ public class ValidatorConfig implements ApplicationContextAware {
     @Value("${validator.output.report.template}")
     private String reportTemplate;
 
+    @Value("${validator.output.report.writeReportUrl}")
+    private String writeReportUrl;
+
     private ApplicationContext applicationContext;
     private TestDriver driver;
 
@@ -123,6 +126,15 @@ public class ValidatorConfig implements ApplicationContextAware {
     public String ordersClientLog() {
         logger.debug("ordersClientLog:{}", ordersClientLog);
         return ordersClientLog;
+    }
+
+
+
+
+    @Bean
+    public String writeReportUrl() {
+        logger.debug("writeReportUrl:{}", writeReportUrl);
+        return writeReportUrl;
     }
 
 
@@ -208,8 +220,12 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
+
+
+
     @Bean
-    public TestCollector testCollector(@NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
+    public TestCollector testCollector(
+        @NonNull final ConcurrentHashMap<String, TestStatus> pendingTests,
         @NonNull final ConcurrentHashMap<String, TestStatus> completedTests,
         @NonNull final RestTemplate restTemplate) {
         var collector = new TestCollector(
@@ -218,7 +234,8 @@ public class ValidatorConfig implements ApplicationContextAware {
             restTemplate,
             ordersGeneratorLog,
             ordersClientLog,
-            heartbeatLog);
+            heartbeatLog,
+            writeReportUrl);
         new Thread(collector).start();
         return collector;
     }
