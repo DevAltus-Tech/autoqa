@@ -30,8 +30,8 @@ services:
     depends_on:
       validator:
         condition: service_healthy
-      #order-generator:
-      #  condition: service_healthy
+      heartbeat:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
@@ -55,6 +55,10 @@ services:
       - autoqa
     depends_on:
       validator:
+        condition: service_healthy
+      heartbeat:
+        condition: service_healthy
+      order-client:
         condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
@@ -80,8 +84,6 @@ services:
       - autoqa
     depends_on:
       validator:
-        condition: service_healthy
-      order-generator:
         condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"

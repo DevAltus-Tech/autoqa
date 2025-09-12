@@ -23,6 +23,6 @@ public class JmsEventHandler {
 
 
     public void onJmsEvent(final String event, final String service) {
-        logger.error("Received JMS event: {} from service: {}", event, service);
+        logger.warn("Received JMS event: {} from service: {}", event, service);
     }
 }

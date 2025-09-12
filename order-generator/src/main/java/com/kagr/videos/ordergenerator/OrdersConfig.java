@@ -5,6 +5,15 @@ package com.kagr.videos.ordergenerator;
 
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.Topic;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 
 
@@ -68,6 +66,14 @@ public class OrdersConfig {
 
 
 
+    @Bean
+    OrderGenController orderGenController(OrderProducer producer) {
+        logger.info("Creating OrderGenController");
+        return new OrderGenController(producer);
+    }
+
+
+
 
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
@@ -98,25 +104,31 @@ public class OrdersConfig {
     }
 
 
-
-
-
     @Bean
     public MessageProducer ordersMessageProducer(Connection connection) throws JMSException {
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        final Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
-        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
-        return session.createProducer(theTopic);
+        final Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
+        logger.info("Creating MessageProducer for Heartbeat on topic: {}", this.heartbeatTopic);
+        return session.createProducer(heartbeatTopic);
+    }
+
+
+    @Bean
+    public Session jmsSession(Connection connection) throws JMSException {
+        logger.info("Creating Session for connection: {}", connection);
+        return connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
     }
 
 
 
-
-
     @Bean
-    public OrderProducer orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderProducer(ordersMessageProducer);
-        logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
+    public OrderProducer orderProducer(
+        Session session,
+        MessageProducer ordersMessageProducer) throws JMSException {
+        final Topic theTopic = session.createTopic(ordersTopic);
+        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
+        session.createProducer(theTopic);
+        var producer = new OrderProducer(ordersMessageProducer, session);
         jmsConsumers.add(producer::handleJmsEvent);
         return producer;
     }
@@ -142,7 +154,7 @@ public class OrdersConfig {
 
     @Bean
     public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
+        @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
         logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
         return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
     }

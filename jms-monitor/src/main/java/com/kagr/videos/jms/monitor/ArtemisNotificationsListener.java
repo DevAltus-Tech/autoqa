@@ -87,13 +87,15 @@ public class ArtemisNotificationsListener implements MessageListener {
 
             if (!StringUtil.isNullOrEmpty(message.getStringProperty("_AMQ_NotifType")) &&
                 !StringUtil.isNullOrEmpty(message.getStringProperty("_AMQ_Client_ID"))) {
-                logger.info("Notification message: {}, Client-ID:{}", message.getStringProperty("_AMQ_NotifType"), message.getStringProperty("_AMQ_Client_ID"));
+                final var notifType = message.getStringProperty("_AMQ_NotifType");
+                final var clientId = message.getStringProperty("_AMQ_Client_ID");
+                logger.info("Notification message: {}, Client-ID:{}", notifType, clientId);
 
                 for (BiConsumer<String, String> consumer : consumers) {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Message sent to consumer: {}", consumer);
                     }
-                    consumer.accept(message.getStringProperty("_AMQ_NotifType"), message.getStringProperty("_AMQ_Client_ID"));
+                    consumer.accept(notifType, clientId);
 
                 }
             }

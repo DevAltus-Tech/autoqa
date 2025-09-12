@@ -78,6 +78,7 @@ public class ValidatorConfig implements ApplicationContextAware {
     private String reportTemplate;
 
     private ApplicationContext applicationContext;
+    private TestDriver driver;
 
 
 
@@ -200,7 +201,11 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
+    @Bean
+    public TestDriver testDriver() {
+        driver = new TestDriver();
+        return driver;
+    }
 
 
     @Bean
@@ -223,12 +228,17 @@ public class ValidatorConfig implements ApplicationContextAware {
 
 
     @Bean
-    public Set<BiConsumer<String, String>> consumers(@NonNull final TestCollector collector) {
+    public Set<BiConsumer<String, String>> consumers(
+        @NonNull final TestCollector collector,
+        @NonNull final TestDriver driver) {
         if (jmsConsumers == null) {
             logger.info("Creating empty set of consumers");
             return new HashSet<>();
         }
+
+
         jmsConsumers.add(collector::handleJmsEvent);
+        jmsConsumers.add(driver::handleJmsEvent);
         return jmsConsumers;
     }
 

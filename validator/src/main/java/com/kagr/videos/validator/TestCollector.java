@@ -104,8 +104,6 @@ public class TestCollector implements Runnable {
 
 
 
-
-
     private void startLogReader(String name) {
         logger.info("starting log reader for: {}", name);
         try (var logReader = new DockerLogsReader(name, logQueue)) {
@@ -117,9 +115,6 @@ public class TestCollector implements Runnable {
             logger.error(ex.toString(), ex);
         }
     }
-
-
-
 
 
     @Override
@@ -163,10 +158,6 @@ public class TestCollector implements Runnable {
         }
     }
 
-
-
-
-
     private void checkForAndPerformTermination() {
         if (pendingTests.isEmpty()) {
             logger.warn("All tests completed, terminating log readers");
@@ -198,8 +189,6 @@ public class TestCollector implements Runnable {
 
         }
     }
-
-
 
     private int sendShutdownCommand(final String serviceName) {
         String url = "http://" + serviceName + ":8080/actuator/shutdown";

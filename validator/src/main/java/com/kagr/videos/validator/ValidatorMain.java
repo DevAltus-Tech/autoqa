@@ -18,12 +18,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.Random;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 
 
 
 @Slf4j
+@EnableScheduling
 @SpringBootApplication(scanBasePackages = {"com.kagr.videos.validator"})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @EnableConfigurationProperties({TestConfig.class, ValidatorConfig.class})

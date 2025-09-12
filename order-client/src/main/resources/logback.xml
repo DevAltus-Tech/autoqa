@@ -19,9 +19,12 @@
     </appender>
 
 
-    <logger name="ch.qos.logback" level="OFF" additivity="true"/>
+    <logger name="com.kagr.videos.jms.monitor" level="INFO" additivity="true"/>
     <logger name="org.springframework" level="OFF" additivity="true"/>
-    <logger name="com.kagr.videos.jms.monitor" level="WARN" additivity="true"/>
+    <logger name="org.apache.activemq.artemis" level="WARN" additivity="true"/>
+    <logger name="org.apache" level="OFF" additivity="true"/>
+    <logger name="ch.qos.logback" level="OFF" additivity="true"/>
+    <logger name="io.netty.buffer" level="OFF" additivity="true"/>
 
     <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE"/>
