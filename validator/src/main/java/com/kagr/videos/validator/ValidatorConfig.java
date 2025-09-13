@@ -130,6 +130,13 @@ public class ValidatorConfig implements ApplicationContextAware {
 
 
 
+    @Bean
+    public ShutdownHandler shutdownHandler() {
+        return new SystemExitShutdownHandler();
+    }
+
+
+
 
     @Bean
     public String writeReportUrl() {
@@ -235,7 +242,8 @@ public class ValidatorConfig implements ApplicationContextAware {
             ordersGeneratorLog,
             ordersClientLog,
             heartbeatLog,
-            writeReportUrl);
+            writeReportUrl,
+            new SystemExitShutdownHandler());
         new Thread(collector).start();
         return collector;
     }

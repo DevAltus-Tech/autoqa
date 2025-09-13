@@ -46,6 +46,7 @@ public class TestCollector implements Runnable {
     private final String ordersClientLog;
     private final String heartbeatLog;
     private final String writeReportUrl;
+    private final ShutdownHandler shutdownHandler;
 
     private final HashMap<String, DockerLogsReader> logReaders = new HashMap<>();
     private final LinkedBlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
@@ -158,6 +159,8 @@ public class TestCollector implements Runnable {
         }
     }
 
+
+
     private void checkForAndPerformTermination() {
         if (pendingTests.isEmpty()) {
             logger.warn("All tests completed, terminating log readers");
@@ -184,8 +187,7 @@ public class TestCollector implements Runnable {
 
 
             writeShutdownReport();
-            System.exit(0);
-
+            shutdownHandler.terminateProcess();
         }
     }
 
@@ -203,7 +205,6 @@ public class TestCollector implements Runnable {
                              .contentType(MediaType.APPLICATION_JSON)
                              .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                              .build();
-            RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(request, String.class);
             logger.info("Shutdown command sent for service: {}, response:{}", serviceName, response);
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -236,11 +237,13 @@ public class TestCollector implements Runnable {
             var request = new HttpEntity<>(body, headers);
             var response = restTemplate.postForEntity(writeReportUrl, request, String.class);
 
-            if (response.getStatusCode().is2xxSuccessful()) {
+            if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 logger.info("Report written successfully to {}: {}", writeReportUrl, response.getBody());
             }
-            else {
+            else if (response != null) {
                 logger.error("Failed to write report to {}: status={}, body={}", writeReportUrl, response.getStatusCode(), response.getBody());
+            } else {
+                logger.error("Failed to write report to {}: response was null", writeReportUrl);
             }
         }
         catch (RestClientException ex) {
