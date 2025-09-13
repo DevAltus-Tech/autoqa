@@ -30,7 +30,7 @@ public class HeartbeatConsumer implements MessageListener {
         try {
             if (message instanceof final TextMessage textMessage) {
                 String text = textMessage.getText();
-                logger.info("Received JMS event: {}", text);
+                logger.info("Received JMS event: {}, from:{}", text, message.getJMSDestination().toString());
             }
             else {
                 logger.error("Received non-text JMS message");

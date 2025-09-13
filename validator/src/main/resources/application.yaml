@@ -59,11 +59,16 @@ tests:
   log-validation:
     heartbeat:
       - "HEARTBEAT .* Sent heartbeat message.*"
-      - "ORDR_GEN .* Heartbeat sequence.*"
-      - "ORDR_CLN .* Heartbeat sequence.*"
+      - "ORDR_GEN .* Heartbeat sequence: 10.*"
+      - "ORDR_CLN .* Heartbeat sequence: 10.*"
     orders:
       - "ORDR_GEN .* Sent order message.*"
-      - "ORDR_CLN .* Received JMS event: OrderID:1.*"
+      - "ORDR_GEN .* Received Order Acknowledgment: 1.*"
+      - "ORDR_GEN .* Received Order Acknowledgment: 2.*"
+      - "ORDR_CLN .* Received Order Message: 1.*"
+      - "ORDR_CLN .* Received Order Message: 2.*"
+      - "ORDR_CLN .* Sent acknowledgment for message ID: 1.*"
+      - "ORDR_CLN .* Sent acknowledgment for message ID: 2.*"
     initialized:
       - "OrderProducer initialized"
       - "HeartbeatProducer initialized"

@@ -5,27 +5,25 @@ package com.kagr.videos.heartbeat;
 
 
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
-import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 
 
@@ -58,8 +56,8 @@ public class HearbeatConfig {
 
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
-        TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
-        ActiveMQConnectionFactory connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
+        final var transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
+        final var connectionFactory = ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
         connectionFactory.setBrokerURL(brokerAddress);
         connectionFactory.setUser(username);
         connectionFactory.setPassword(password);
@@ -75,7 +73,7 @@ public class HearbeatConfig {
     @Bean
     public Session jmsSession(Connection connection) throws JMSException {
         logger.info("Creating Session for connection: {}", connection);
-        Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
+        final var session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
         return session;
     }
 
@@ -84,9 +82,9 @@ public class HearbeatConfig {
 
 
     @Bean
-    public MessageProducer ordersMessageProducer(Session session) throws JMSException {
+    public MessageProducer heartbeatMessageProducer(@NonNull final Session session) throws JMSException {
         logger.info("Creating OrderProducer for topic: {}", heartbeatTopic);
-        Topic theTopic = ActiveMQJMSClient.createTopic(heartbeatTopic);
+        final var theTopic = ActiveMQJMSClient.createTopic(heartbeatTopic);
         return session.createProducer(theTopic);
     }
 

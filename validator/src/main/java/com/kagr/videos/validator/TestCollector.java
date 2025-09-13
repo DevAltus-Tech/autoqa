@@ -193,7 +193,7 @@ public class TestCollector implements Runnable {
 
 
 
-    private int sendShutdownCommand(@NonNull final String serviceName) {
+    protected int sendShutdownCommand(@NonNull final String serviceName) {
         String url = "http://" + serviceName + ":8080/actuator/shutdown";
         logger.warn("Sending shutdown command to: {}", url);
 
@@ -203,11 +203,13 @@ public class TestCollector implements Runnable {
                              .contentType(MediaType.APPLICATION_JSON)
                              .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                              .build();
+            RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(request, String.class);
             logger.info("Shutdown command sent for service: {}, response:{}", serviceName, response);
             if (response.getStatusCode().is2xxSuccessful()) {
                 return 1;
             }
+
             else {
                 logger.error("Failed to send shutdown command for service: {}, response:{}", serviceName, response);
             }
@@ -249,10 +251,6 @@ public class TestCollector implements Runnable {
         }
     }
 
-
-
-
-
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
         logger.warn("Performing actions after termination timeout");
@@ -266,5 +264,6 @@ public class TestCollector implements Runnable {
         pendingTests.clear();
         checkForAndPerformTermination();
     }
+
 
 }

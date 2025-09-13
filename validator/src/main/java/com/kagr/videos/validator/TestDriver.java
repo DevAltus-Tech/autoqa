@@ -30,6 +30,12 @@ public class TestDriver {
         if (StringUtils.equals(Defaults.SESSION_CREATED, status)
             && StringUtils.equals(Defaults.ORDER_GENERATOR, service)) {
             logger.warn("SENDING ORDER TO: {}", service);
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException ex_) {
+                throw new RuntimeException(ex_);
+            }
             sendOrderGeneratorStartCommand(service);
         }
     }
