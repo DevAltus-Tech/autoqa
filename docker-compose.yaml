@@ -1,7 +1,7 @@
 services:
   validator:
     build:
-      context: ../validator
+      context: ./validator
       dockerfile: Dockerfile
     container_name: validator
     networks:
@@ -22,7 +22,7 @@ services:
 
   order-client:
     build:
-      context: ../order-client
+      context: ./order-client
       dockerfile: Dockerfile
     container_name: order-client
     networks:
@@ -48,7 +48,7 @@ services:
 
   order-generator:
     build:
-      context: ../order-generator
+      context: ./order-generator
       dockerfile: Dockerfile
     container_name: order-generator
     networks:
@@ -77,7 +77,7 @@ services:
 
   heartbeat:
     build:
-      context: ../heartbeat
+      context: ./heartbeat
       dockerfile: Dockerfile
     container_name: heartbeat
     networks:
@@ -112,4 +112,4 @@ volumes:
 
 networks:
   autoqa:
-    external: false
+    external: true
