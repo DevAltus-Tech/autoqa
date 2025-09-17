@@ -24,7 +24,7 @@ jobs:
 
       - name: Build all Docker images
         run: |
-          docker-compose build
+          docker compose build
 
       - name: List built images
         run: |
