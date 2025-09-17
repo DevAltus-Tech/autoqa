@@ -112,4 +112,4 @@ volumes:
 
 networks:
   autoqa:
-    external: true
+    external: false

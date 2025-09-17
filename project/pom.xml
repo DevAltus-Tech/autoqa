@@ -27,7 +27,6 @@
         <module>../validator</module>
         <module>../jms-monitor</module>
         <module>../heartbeat</module>
-        <module>../config-gateway</module>
     </modules>
 
     <properties>

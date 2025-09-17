@@ -1,7 +1,17 @@
-FROM openjdk:21-jdk-slim
+FROM amazoncorretto:21
 
-# Install curl
-RUN apt-get update && apt-get install -y curl
+# Install curl, ping, and other debugging utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    iputils-ping \
+    net-tools \
+    iproute2 \
+    dnsutils \
+    procps \
+    vim \
+    nano \
+    less \
+ && rm -rf /var/lib/apt/lists/*
 
 
 # Set the working directory to /app
