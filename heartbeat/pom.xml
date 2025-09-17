@@ -7,7 +7,7 @@
         <groupId>com.kagr.vidoes</groupId>
         <artifactId>autoqa</artifactId>
         <version>0.1-SNAPSHOT</version>
-        <relativePath>../project/pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>com.kagr.videos</groupId>
