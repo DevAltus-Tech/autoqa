@@ -178,7 +178,8 @@ public class TestCollector implements Runnable {
             }
 
 
-            if (shutdownCount != services.size()) {
+            var isClean = (shutdownCount == services.size());
+            if (isClean) {
                 logger.error("Not all services were shutdown");
             }
             else {
@@ -187,7 +188,7 @@ public class TestCollector implements Runnable {
 
 
             writeShutdownReport();
-            shutdownHandler.terminateProcess();
+            shutdownHandler.terminateProcess(isClean ? 0 : 1);
         }
     }
 
@@ -242,7 +243,8 @@ public class TestCollector implements Runnable {
             }
             else if (response != null) {
                 logger.error("Failed to write report to {}: status={}, body={}", writeReportUrl, response.getStatusCode(), response.getBody());
-            } else {
+            }
+            else {
                 logger.error("Failed to write report to {}: response was null", writeReportUrl);
             }
         }

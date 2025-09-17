@@ -169,8 +169,8 @@ class TestCollectorTest {
 
     static class TestableCollector implements ShutdownHandler {
         @Override
-        public void terminateProcess() {
-            log.info("terminateProcess");
+        public void terminateProcess(int exitCode) {
+            log.info("terminateProcess:{}", exitCode);
         }
     }
 }
