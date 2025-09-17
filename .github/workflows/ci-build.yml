@@ -19,6 +19,9 @@ jobs:
           distribution: 'corretto'
           java-version: '21'
 
+      - name: Build project (Maven)
+        run: mvn clean package
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
