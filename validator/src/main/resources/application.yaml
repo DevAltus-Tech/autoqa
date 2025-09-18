@@ -51,7 +51,6 @@ validator:
 tests:
   termination:
     timeout: 15000  # in milliseconds
-    shutdown-on-success: true
   jms-connect:
     - order-generator
     - heartbeat
