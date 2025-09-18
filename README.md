@@ -2,15 +2,23 @@
 
 ## Project Description
 
-This project is a Java-based application that uses Maven for build automation. It includes several modules, each with specific functionality. Below is an overview of the modules, how to build the
-project, and what each module does.  
-Modules
+This java based project was built specifically to showcase automated testing & evidence collection. This non-intrusive method does not require extensive rewrites
 
-
-### 0. project
-
-main module - contains the multi-module Maven project configuration, docker-compose, and this is where reports are produced. Additionally, this folder contains the ActiveMQ broker and configuration
+## The Project
+Contains the multi-module Maven project configuration, docker-compose, and this is where reports are produced. Additionally, this folder contains the ActiveMQ broker and configuration
 allowing you to divorce running that from the tests.
+
+
+The purpose of the sub-projects is to demonstate a project of suffecient complexity to showcase the testing framework. Each sub-project has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
+
+![Project Structure](docs/architecture.png)
+
+
+
+
+
+
+# Module Descriptions
 
 #### jms-monitor
 *Description:* This module listens to JMS management events, and provides a framework for working with them (via callbacks).
