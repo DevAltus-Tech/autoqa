@@ -77,7 +77,7 @@ public class ArtemisNotificationsListener implements MessageListener {
 
         try {
             if (logger.isDebugEnabled()) {
-                Iterator<String> itr = ((Enumeration<String>) message.getPropertyNames().asIterator();
+                Iterator<String> itr = ((Enumeration<String>) message.getPropertyNames()).asIterator();
                 String key;
                 while (itr.hasNext()) {
                     key = itr.next();
