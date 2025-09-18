@@ -5,10 +5,10 @@ package com.kagr.videos.jms.monitor;
 
 
 import io.netty.util.internal.StringUtil;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -16,9 +16,9 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.function.BiConsumer;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 
@@ -37,7 +37,7 @@ public class ArtemisNotificationsListener implements MessageListener {
 
     @Autowired
     public ArtemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                        @NonNull final Set<BiConsumer<String, String>> consumers)
+        @NonNull final Set<BiConsumer<String, String>> consumers)
         throws JMSException {
         this.jmsConnection = jmsConnection;
         this.consumers = consumers;
@@ -66,6 +66,7 @@ public class ArtemisNotificationsListener implements MessageListener {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onMessage(final Message message) {
         final var str = message.toString();
         if (StringUtil.isNullOrEmpty(str)) {
@@ -76,7 +77,7 @@ public class ArtemisNotificationsListener implements MessageListener {
 
         try {
             if (logger.isDebugEnabled()) {
-                Iterator<String> itr = message.getPropertyNames().asIterator();
+                Iterator<String> itr = ((Enumeration<String>) message.getPropertyNames().asIterator();
                 String key;
                 while (itr.hasNext()) {
                     key = itr.next();
@@ -85,10 +86,9 @@ public class ArtemisNotificationsListener implements MessageListener {
             }
 
 
-            if (!StringUtil.isNullOrEmpty(message.getStringProperty("_AMQ_NotifType")) &&
-                !StringUtil.isNullOrEmpty(message.getStringProperty("_AMQ_Client_ID"))) {
-                final var notifType = message.getStringProperty("_AMQ_NotifType");
-                final var clientId = message.getStringProperty("_AMQ_Client_ID");
+            final var notifType = message.getStringProperty("_AMQ_NotifType");
+            final var clientId = message.getStringProperty("_AMQ_Client_ID");
+            if (!StringUtil.isNullOrEmpty(notifType) && !StringUtil.isNullOrEmpty(clientId)) {
                 logger.info("Notification message: {}, Client-ID:{}", notifType, clientId);
 
                 for (BiConsumer<String, String> consumer : consumers) {
@@ -98,6 +98,9 @@ public class ArtemisNotificationsListener implements MessageListener {
                     consumer.accept(notifType, clientId);
 
                 }
+            }
+            else {
+                logger.warn("Notification message missing required properties: _AMQ_NotifType or _AMQ_Client_ID");
             }
         }
         catch (JMSException ex_) {

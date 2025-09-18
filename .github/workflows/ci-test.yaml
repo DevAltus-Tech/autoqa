@@ -1,4 +1,4 @@
-name: CI Build
+name: CI Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,12 +19,17 @@ jobs:
           distribution: 'corretto'
           java-version: '21'
 
-      - name: Build project (Maven)
-        run: mvn clean package
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build all Docker images
+      - name: Start all services
         run: |
-          docker compose up --build --force-recreate
+          docker compose up -d
+
+      - name: Run Maven tests
+        run: mvn test
+
+      - name: Shutdown all services
+        if: always()
+        run: |
+          docker compose down
