@@ -88,25 +88,40 @@ public class ArtemisNotificationsListener implements MessageListener {
 
             final var notifType = message.getStringProperty("_AMQ_NotifType");
             final var clientId = message.getStringProperty("_AMQ_Client_ID");
-            if (!StringUtil.isNullOrEmpty(notifType) && !StringUtil.isNullOrEmpty(clientId)) {
-                logger.info("Notification message: {}, Client-ID:{}", notifType, clientId);
+            if (isClientMessage(notifType, clientId)) {
 
-                for (BiConsumer<String, String> consumer : consumers) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Notification message: {}, Client-ID:{}", notifType, clientId);
+                }
+
+                final var consumers = this.consumers.iterator();
+                while (consumers.hasNext()) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("No consumers registered to receive notifications");
+                    }
+
+                    final var consumer = consumers.next();
                     if (logger.isTraceEnabled()) {
                         logger.trace("Message sent to consumer: {}", consumer);
                     }
                     consumer.accept(notifType, clientId);
-
                 }
             }
             else {
-                logger.warn("Notification message missing required properties: _AMQ_NotifType or _AMQ_Client_ID");
+                // not a client message, Skip
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Notification message missing required properties: _AMQ_NotifType or _AMQ_Client_ID");
+                }
             }
         }
         catch (JMSException ex_) {
             throw new RuntimeException(ex_);
         }
+    }
 
 
+
+    protected boolean isClientMessage(String notifType, String clientId) {
+        return !StringUtil.isNullOrEmpty(notifType) && !StringUtil.isNullOrEmpty(clientId);
     }
 }

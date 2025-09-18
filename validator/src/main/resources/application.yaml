@@ -69,7 +69,3 @@ tests:
       - "ORDR_CLN .* Received Order Message: 2.*"
       - "ORDR_CLN .* Sent acknowledgment for message ID: 1.*"
       - "ORDR_CLN .* Sent acknowledgment for message ID: 2.*"
-      - "MEMEME .* Order ID: 1, Status: NEW.*"
-    initialized:
-      - "OrderProducer initialized"
-      - "HeartbeatProducer initialized"

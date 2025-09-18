@@ -11,7 +11,7 @@ services:
       BROKER_USERNAME: artemis
       BROKER_PASSWORD: artemis
       LOG_FILE: "/app/var/log/validator.log"
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: "DEBUG"
     ports:
       - "5005:5005"
       - "8081:8080"

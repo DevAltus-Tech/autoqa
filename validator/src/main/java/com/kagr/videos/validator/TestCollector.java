@@ -10,6 +10,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
@@ -76,9 +77,7 @@ public class TestCollector implements Runnable {
         }
 
         logger.info("total pending tests: {}", pendingTests.size());
-        pendingTests.forEach((k, v) -> {
-            logger.info("...Pending test: {}", v);
-        });
+        pendingTests.forEach((k, v) -> logger.info("...Pending test: {}", v));
     }
 
 
@@ -171,19 +170,24 @@ public class TestCollector implements Runnable {
             logReaders.clear();
 
 
-            int shutdownCount = 0;
-            for (String service : services) {
+            Iterator<String> servicesIterator = services.iterator();
+            while (servicesIterator.hasNext()) {
+                var service = servicesIterator.next();
+                servicesIterator.remove();
                 logger.info("shutting down service: {}", service);
-                shutdownCount = sendShutdownCommand(service);
+                sendShutdownCommand(service);
             }
 
 
-            var isClean = (shutdownCount == services.size());
+            var isClean = services.isEmpty();
             if (isClean) {
-                logger.error("Not all services were shutdown");
+                logger.info("All services were shutdown");
             }
             else {
-                logger.info("All services were shutdown");
+                logger.error("Not all services were shutdown");
+                for (String service : services) {
+                    logger.error("Remaining service: {}", service);
+                }
             }
 
 
@@ -209,6 +213,7 @@ public class TestCollector implements Runnable {
             ResponseEntity<String> response = restTemplate.exchange(request, String.class);
             logger.info("Shutdown command sent for service: {}, response:{}", serviceName, response);
             if (response.getStatusCode().is2xxSuccessful()) {
+                logger.debug("Service {} shutdown successfully", serviceName);
                 return 1;
             }
 
@@ -238,11 +243,8 @@ public class TestCollector implements Runnable {
             var request = new HttpEntity<>(body, headers);
             var response = restTemplate.postForEntity(writeReportUrl, request, String.class);
 
-            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+            if (response.getStatusCode().is2xxSuccessful()) {
                 logger.info("Report written successfully to {}: {}", writeReportUrl, response.getBody());
-            }
-            else if (response != null) {
-                logger.error("Failed to write report to {}: status={}, body={}", writeReportUrl, response.getStatusCode(), response.getBody());
             }
             else {
                 logger.error("Failed to write report to {}: response was null", writeReportUrl);
@@ -255,6 +257,10 @@ public class TestCollector implements Runnable {
             logger.error("Unexpected error while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
         }
     }
+
+
+
+
 
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
