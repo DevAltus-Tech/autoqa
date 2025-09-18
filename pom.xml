@@ -22,12 +22,11 @@
         <developer/>
     </developers>
     <modules>
-        <module>../order-generator</module>
-        <module>../order-client</module>
-        <module>../validator</module>
-        <module>../jms-monitor</module>
-        <module>../heartbeat</module>
-        <module>../config-gateway</module>
+        <module>order-generator</module>
+        <module>order-client</module>
+        <module>validator</module>
+        <module>jms-monitor</module>
+        <module>heartbeat</module>
     </modules>
 
     <properties>

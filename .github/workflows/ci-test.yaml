@@ -1,0 +1,35 @@
+name: CI Test
+
+on:
+  push:
+    branches: [ main, master, finishing-projexct ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start all services
+        run: |
+          docker compose up -d
+
+      - name: Run Maven tests
+        run: mvn test
+
+      - name: Shutdown all services
+        if: always()
+        run: |
+          docker compose down

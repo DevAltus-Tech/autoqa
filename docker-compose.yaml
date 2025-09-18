@@ -1,7 +1,7 @@
 services:
   validator:
     build:
-      context: ../validator
+      context: ./validator
       dockerfile: Dockerfile
     container_name: validator
     networks:
@@ -19,40 +19,46 @@ services:
       - logs:/app/var/log
       - ./reports:/app/var/reports
 
-  config-gateway:
+
+  order-client:
     build:
-      context: ../config-gateway
+      context: ./order-client
       dockerfile: Dockerfile
-    container_name: config-gateway
+    container_name: order-client
     networks:
       - autoqa
+    depends_on:
+      validator:
+        condition: service_healthy
+      heartbeat:
+        condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
       BROKER_USERNAME: artemis
       BROKER_PASSWORD: artemis
-      LOG_FILE: "/app/var/log/config-gateway.log"
+      LOG_FILE: "/app/var/log/order-client.log"
       LOG_LEVEL: "INFO"
-      CFG_TOPIC: com.kagr.config
-    #depends_on:
-    #  validator:
-    #    condition: service_healthy
+      CLASSPATH: "/app/classes:/app/resources"
+      CFG_TOPIC: properties
     ports:
       - "5008:5005"
       - "8084:8080"
     volumes:
       - logs:/app/var/log
 
-
-
   order-generator:
     build:
-      context: ../order-generator
+      context: ./order-generator
       dockerfile: Dockerfile
     container_name: order-generator
     networks:
       - autoqa
     depends_on:
       validator:
+        condition: service_healthy
+      heartbeat:
+        condition: service_healthy
+      order-client:
         condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
@@ -68,19 +74,16 @@ services:
     volumes:
       - logs:/app/var/log
 
+
   heartbeat:
     build:
-      context: ../heartbeat
+      context: ./heartbeat
       dockerfile: Dockerfile
     container_name: heartbeat
     networks:
       - autoqa
     depends_on:
       validator:
-        condition: service_healthy
-      order-generator:
-        condition: service_healthy
-      config-gateway:
         condition: service_healthy
     environment:
       BROKER_URL: "tcp://broker:61616"
@@ -95,6 +98,7 @@ services:
     volumes:
       - ../reports:/app/var/reports
       - logs:/app/var/log
+
 
 
 

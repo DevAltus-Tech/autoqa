@@ -6,7 +6,15 @@ package com.kagr.videos.validator;
 
 import com.kagr.videos.validator.logs.DockerLogsReader;
 import com.kagr.videos.validator.reports.TestStatus;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,18 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Pattern;
 
 
 
@@ -41,24 +39,26 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestCollector implements Runnable {
-
     private final ConcurrentHashMap<String, TestStatus> pendingTests;
     private final ConcurrentHashMap<String, TestStatus> completedTests;
     private final RestTemplate restTemplate;
-    private final String ordersLog;
+    private final String ordersGeneratorLog;
+    private final String ordersClientLog;
     private final String heartbeatLog;
+    private final String writeReportUrl;
+    private final ShutdownHandler shutdownHandler;
 
     private final HashMap<String, DockerLogsReader> logReaders = new HashMap<>();
     private final LinkedBlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
     private final LinkedBlockingQueue<String> relevantLogs = new LinkedBlockingQueue<>();
+    private final HashSet<String> services = new HashSet<>();
 
 
 
 
 
-    public void handleJmsEvent(String status, String service) {
+    public void handleJmsEvent(@NonNull final String status, @NonNull final String service) {
         logger.warn("{}/{}", status, service);
-
         if (StringUtils.equals(Defaults.CONSUMER_CREATED, status)) {
             var name = service + Defaults.DEFAULT_CONNECT;
             var actual = pendingTests.remove(name);
@@ -68,6 +68,7 @@ public class TestCollector implements Runnable {
                 actual.setNotes("Consumer created successfully");
                 completedTests.put(name, actual);
                 startLogListener(service);
+                services.add(service);
             }
         }
         else {
@@ -84,15 +85,18 @@ public class TestCollector implements Runnable {
 
 
 
-    private void startLogListener(final String name) {
+    private void startLogListener(@NonNull final String name) {
         if (logger.isTraceEnabled()) {
             logger.trace("Starting log listener for: {}", name);
         }
         if (StringUtils.equalsIgnoreCase(name, Defaults.HEARTBEAT)) {
             startLogReader(heartbeatLog);
         }
-        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDERS)) {
-            startLogReader(ordersLog);
+        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDER_GENERATOR)) {
+            startLogReader(ordersGeneratorLog);
+        }
+        else if (StringUtils.equalsIgnoreCase(name, Defaults.ORDER_CLIENT)) {
+            startLogReader(ordersClientLog);
         }
         else {
             logger.error("Unknown service: {}", name);
@@ -101,9 +105,7 @@ public class TestCollector implements Runnable {
 
 
 
-
-
-    private void startLogReader(String name) {
+    private void startLogReader(@NonNull final String name) {
         logger.info("starting log reader for: {}", name);
         try (var logReader = new DockerLogsReader(name, logQueue)) {
             new Thread(logReader).start();
@@ -114,9 +116,6 @@ public class TestCollector implements Runnable {
             logger.error(ex.toString(), ex);
         }
     }
-
-
-
 
 
     @Override
@@ -162,8 +161,6 @@ public class TestCollector implements Runnable {
 
 
 
-
-
     private void checkForAndPerformTermination() {
         if (pendingTests.isEmpty()) {
             logger.warn("All tests completed, terminating log readers");
@@ -174,13 +171,15 @@ public class TestCollector implements Runnable {
             logReaders.clear();
 
 
-            int shutdownCount = sendShutdownCommand("order-generator");
-            logger.info("shutdown count sent for order-generator: {}", shutdownCount);
-            shutdownCount += sendShutdownCommand("heartbeat");
-            logger.info("shutdown count sent for heartbeat: {}", shutdownCount);
+            int shutdownCount = 0;
+            for (String service : services) {
+                logger.info("shutting down service: {}", service);
+                shutdownCount = sendShutdownCommand(service);
+            }
 
 
-            if (shutdownCount != 2) {
+            var isClean = (shutdownCount == services.size());
+            if (isClean) {
                 logger.error("Not all services were shutdown");
             }
             else {
@@ -188,11 +187,8 @@ public class TestCollector implements Runnable {
             }
 
 
-
             writeShutdownReport();
-            //sendShutdownCommand("validator");
-            System.exit(0);
-
+            shutdownHandler.terminateProcess(isClean ? 0 : 1);
         }
     }
 
@@ -200,20 +196,22 @@ public class TestCollector implements Runnable {
 
 
 
-    private int sendShutdownCommand(final String serviceName) {
+    protected int sendShutdownCommand(@NonNull final String serviceName) {
         String url = "http://" + serviceName + ":8080/actuator/shutdown";
+        logger.warn("Sending shutdown command to: {}", url);
 
         try {
             RequestEntity<Void> request =
                 RequestEntity.post(URI.create(url))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                    .build();
+                             .contentType(MediaType.APPLICATION_JSON)
+                             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                             .build();
             ResponseEntity<String> response = restTemplate.exchange(request, String.class);
             logger.info("Shutdown command sent for service: {}, response:{}", serviceName, response);
             if (response.getStatusCode().is2xxSuccessful()) {
                 return 1;
             }
+
             else {
                 logger.error("Failed to send shutdown command for service: {}, response:{}", serviceName, response);
             }
@@ -228,12 +226,41 @@ public class TestCollector implements Runnable {
 
 
 
+    public void writeShutdownReport() {
+        try {
+            var body = new LinkedMultiValueMap<String, String>();
+            body.add("filePostpend", Long.toString(System.currentTimeMillis()));
+
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+            var request = new HttpEntity<>(body, headers);
+            var response = restTemplate.postForEntity(writeReportUrl, request, String.class);
+
+            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Report written successfully to {}: {}", writeReportUrl, response.getBody());
+            }
+            else if (response != null) {
+                logger.error("Failed to write report to {}: status={}, body={}", writeReportUrl, response.getStatusCode(), response.getBody());
+            }
+            else {
+                logger.error("Failed to write report to {}: response was null", writeReportUrl);
+            }
+        }
+        catch (RestClientException ex) {
+            logger.error("RestClientException while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
+        }
+        catch (Exception ex) {
+            logger.error("Unexpected error while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
+        }
+    }
 
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")
     public void performPostTimeoutActions() {
         logger.warn("Performing actions after termination timeout");
         for (var entry : pendingTests.entrySet()) {
-            logger.error("Service shutdown successfull, marking test as failed: {}", entry.getKey());
+            logger.error("Service shutdown successfully, marking test as failed: {}", entry.getKey());
             var test = entry.getValue();
             test.setStatus("FAIL");
             test.setNotes("Timeout");
@@ -243,32 +270,5 @@ public class TestCollector implements Runnable {
         checkForAndPerformTermination();
     }
 
-
-
-
-
-    public void writeShutdownReport() {
-        try {
-            final String url = "http://validator:8080/report/write";
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("filePostpend", Long.toString(System.currentTimeMillis()));
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            logger.info("Final report request sent to: {}, response: {}", url, response.getBody());
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Report written successfully:{}", response.getBody());
-            }
-            else {
-                logger.error("Failed to write report:{}", response);
-            }
-        }
-        catch (RestClientException ex) {
-            logger.error(ex.toString(), ex);
-        }
-    }
 
 }

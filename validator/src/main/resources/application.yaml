@@ -26,9 +26,13 @@ broker:
   password: admin
 
 
-orders:
+orders-generator:
   topic: orders.topic
   log: /app/var/log/order-generator.log
+
+orders-client:
+  topic: orders.topic
+  log: /app/var/log/order-client.log
 
 heartbeat:
   topic: heartbeat.topic
@@ -39,20 +43,33 @@ validator:
   output:
     report:
       template: /html/report.vm
+      writeReportUrl: http://validator:8080/report/write
 
 
 
 
 tests:
   termination:
-    timeout: 400000
+    timeout: 15000  # in milliseconds
     shutdown-on-success: true
   jms-connect:
     - order-generator
     - heartbeat
+    - order-client
   log-validation:
     heartbeat:
-      - "HEARTBEAT .* Sent MMMM heartbeat message.*"
+      - "HEARTBEAT .* Sent heartbeat message.*"
+      - "ORDR_GEN .* Heartbeat sequence: 10.*"
+      - "ORDR_CLN .* Heartbeat sequence: 10.*"
     orders:
-      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
-      - ".*ORDERS .* Heartbeat sequence.*"
+      - "ORDR_GEN .* Sent order message.*"
+      - "ORDR_GEN .* Received Order Acknowledgment: 1.*"
+      - "ORDR_GEN .* Received Order Acknowledgment: 2.*"
+      - "ORDR_CLN .* Received Order Message: 1.*"
+      - "ORDR_CLN .* Received Order Message: 2.*"
+      - "ORDR_CLN .* Sent acknowledgment for message ID: 1.*"
+      - "ORDR_CLN .* Sent acknowledgment for message ID: 2.*"
+      - "MEMEME .* Order ID: 1, Status: NEW.*"
+    initialized:
+      - "OrderProducer initialized"
+      - "HeartbeatProducer initialized"

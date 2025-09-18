@@ -1,7 +1,4 @@
-FROM openjdk:21-jdk-slim
-
-# Install curl
-RUN apt-get update && apt-get install -y curl
+FROM amazoncorretto:21
 
 
 # Set the working directory to /app

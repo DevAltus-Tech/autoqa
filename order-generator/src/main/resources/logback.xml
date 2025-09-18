@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration debug="true">
+<configuration debug="false">
 
     <property name="LOG_FILE" value="${LOG_FILE:-/app/var/log/application.log}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL:-trace}"/>
@@ -7,21 +7,25 @@
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_FILE}</file>
         <encoder>
-            <pattern>ORDERS - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
+            <pattern>ORDR_GEN - %d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <useJansi>true</useJansi>
         <encoder>
-            <pattern>RDER_GEN - %d{yyyy-MM-dd HH:mm:ss} [%t] %highlight(%-5level) - %msg%n</pattern>
+            <pattern>ORDR_GEN - %d{yyyy-MM-dd HH:mm:ss} %logger{0} %highlight(%-5level) - %msg%n</pattern>
         </encoder>
     </appender>
 
 
+    <logger name="com.kagr.videos.jms.monitor" level="INFO" additivity="true"/>
+    <logger name="org.springframework" level="OFF" additivity="true"/>
+    <logger name="org.apache.activemq.artemis" level="WARN" additivity="true"/>
+    <logger name="org.apache" level="OFF" additivity="true"/>
     <logger name="ch.qos.logback" level="OFF" additivity="true"/>
-    <logger name="org.springframework" level="trace" additivity="true"/>
-    <logger name="com.kagr.videos.jms.monitor" level="WARN" additivity="true"/>
+    <logger name="io.netty.buffer" level="OFF" additivity="true"/>
+
 
     <root level="${LOG_LEVEL}">
         <appender-ref ref="FILE"/>

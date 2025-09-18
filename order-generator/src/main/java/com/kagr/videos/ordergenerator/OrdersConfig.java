@@ -4,9 +4,14 @@ package com.kagr.videos.ordergenerator;
 
 
 
-import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.Topic;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
@@ -18,17 +23,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
-
 
 
 
@@ -38,8 +32,6 @@ import java.util.function.BiConsumer;
 @Configuration
 @ConfigurationProperties
 public class OrdersConfig {
-
-    private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
     @Value("${broker.url}")
     private String brokerAddress;
@@ -51,7 +43,7 @@ public class OrdersConfig {
     private String password;
 
     @Value("${orders.topic}")
-    private String ordersTopic;
+    private String ordersQueue;
 
     @Value("${heartbeat.topic}")
     private String heartbeatTopic;
@@ -65,6 +57,14 @@ public class OrdersConfig {
     @Value("${spring.application.name}")
     private String appName;
 
+
+
+
+    @Bean
+    OrderGenController orderGenController(OrderProducer producer) {
+        logger.info("Creating OrderGenController");
+        return new OrderGenController(producer);
+    }
 
 
 
@@ -88,20 +88,6 @@ public class OrdersConfig {
 
 
     @Bean
-    public MessageConsumer configPropertiesQueueConsumer(Connection connection, ConfigGatewayConsumer configGatewayConsumer) throws JMSException {
-        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        final Queue configPropertiesQueue = session.createQueue(configGatewayTopic);
-        logger.info("Creating MessageConsumer for ConfigGatewayConsumer on queue: {}", configGatewayTopic);
-        final MessageConsumer consumer = session.createConsumer(configPropertiesQueue);
-        consumer.setMessageListener(configGatewayConsumer);
-        return consumer;
-    }
-
-
-
-
-
-    @Bean
     public MessageConsumer heartbeatMessageConsumer(Connection connection, HeartbeatConsumer heartbeatConsumer) throws JMSException {
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Topic heartbeatTopic = session.createTopic(this.heartbeatTopic);
@@ -112,52 +98,20 @@ public class OrdersConfig {
     }
 
 
-
-
-
     @Bean
-    public MessageProducer ordersMessageProducer(Connection connection) throws JMSException {
-        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        final Topic theTopic = ActiveMQJMSClient.createTopic(ordersTopic);
-        logger.info("Creating {} OrderProducer for topic: {}", theTopic, ordersTopic);
-        return session.createProducer(theTopic);
+    public Session jmsSession(Connection connection) throws JMSException {
+        logger.info("Creating Session for connection: {}", connection);
+        return connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
     }
 
 
 
-
-
     @Bean
-    public OrderProducer orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderProducer(ordersMessageProducer);
-        logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
-        jmsConsumers.add(producer::handleJmsEvent);
-        return producer;
+    public OrderProducer orderProducer(Session session) throws JMSException {
+        final Queue theQueue = session.createQueue(this.ordersQueue);
+        logger.info("Creating {} OrderProducer for queue: {}", theQueue, this.ordersQueue);
+        final MessageProducer ordersMessageProducer = session.createProducer(theQueue);
+        return new OrderProducer(ordersMessageProducer, session);
     }
 
-
-
-
-
-    @Bean
-    public Set<BiConsumer<String, String>> consumers() {
-        if (jmsConsumers == null) {
-            logger.info("Creating empty set of consumers");
-            return new HashSet<>();
-        }
-
-        //jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
-        return jmsConsumers;
-    }
-
-
-
-
-
-    @Bean
-    public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
-        logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
-        return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
-    }
 }

@@ -38,6 +38,11 @@ public class ReportService {
     private final TestCollector testCollector;
     private final TestStatus globalStatus = new TestStatus("Global Status", "PENDING", "");
 
+    // Package-private getter for testing
+    TestStatus getGlobalStatus() {
+        return globalStatus;
+    }
+
 
 
 

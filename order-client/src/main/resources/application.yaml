@@ -11,18 +11,17 @@ management:
       exposure:
         include: "*"
 
-
-logging:
-  level:
-    org.springframework: OFF  # Log at INFO level
-    org.springframework.web: WARN  # Log errors from Spring MVC at ERROR level
-
 server:
   error:
     whitelabel:
       enabled: false  # Disable the default error response page
     include-message: always
     include-binding-errors: always
+
+logging:
+  level:
+    org.springframework: OFF  # Log at INFO level
+    org.springframework.web: WARN  # Log errors from Spring MVC at ERROR level
 
 broker:
   url: ${BROKER_URL:tcp://localhost:61616}

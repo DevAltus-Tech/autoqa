@@ -4,9 +4,13 @@ package com.kagr.videos.orderclient;
 
 
 
-import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.Topic;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
@@ -18,17 +22,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
-
 
 
 
@@ -38,8 +31,6 @@ import java.util.function.BiConsumer;
 @Configuration
 @ConfigurationProperties
 public class OrderClientConfig {
-
-    private final HashSet<BiConsumer<String, String>> jmsConsumers;
 
     @Value("${broker.url}")
     private String brokerAddress;
@@ -51,7 +42,7 @@ public class OrderClientConfig {
     private String password;
 
     @Value("${orders.topic}")
-    private String ordersTopic;
+    private String ordersQueue;
 
     @Value("${heartbeat.topic}")
     private String heartbeatTopic;
@@ -80,6 +71,16 @@ public class OrderClientConfig {
 
 
 
+    @Bean
+    public Session jmsSession(Connection connection) throws JMSException {
+        logger.info("Creating Session for connection: {}", connection);
+        Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
+        return session;
+    }
+
+
+
+
 
     @Bean
     public MessageConsumer heartbeatMessageConsumer(Session session, HeartbeatConsumer heartbeatConsumer) throws JMSException {
@@ -95,10 +96,9 @@ public class OrderClientConfig {
 
 
     @Bean
-    public Session jmsSession(Connection connection) throws JMSException {
-        logger.info("Creating Session for connection: {}", connection);
-        Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-        return session;
+    public OrderReceiver orderReceiver(Session session) {
+        logger.info("Creating OrderReceiver");
+        return new OrderReceiver(session);
     }
 
 
@@ -106,47 +106,12 @@ public class OrderClientConfig {
 
 
     @Bean
-    public MessageConsumer ordersMessageConsumer(Session session) throws JMSException {
-        Queue theQ = session.createQueue(ordersTopic);
-        logger.info("Creating {} OrderProducer for topic: {}", theQ, ordersTopic);
-        return session.createConsumer(theQ);
-    }
-
-
-
-
-
-    @Bean
-    public OrderReceiver orderProducer(MessageProducer ordersMessageProducer, Set<BiConsumer<String, String>> jmsConsumers) {
-        var producer = new OrderReceiver(ordersMessageProducer);
-        logger.info("{} for topic: {}", producer.getClass().getSimpleName(), ordersTopic);
-        jmsConsumers.add(producer::handleJmsEvent);
-        return producer;
-    }
-
-
-
-
-
-    @Bean
-    public Set<BiConsumer<String, String>> consumers() {
-        if (jmsConsumers == null) {
-            logger.info("Creating empty set of consumers");
-            return new HashSet<>();
-        }
-
-        jmsConsumers.add(new JmsEventHandler()::onJmsEvent);
-        return jmsConsumers;
-    }
-
-
-
-
-
-    @Bean
-    public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
-                                                                     @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
-        logger.info("Creating ArtemisNotificationsListener for broker URL: {}", brokerAddress);
-        return new ArtemisNotificationsListener(jmsConnection, jmsEventConsumers).startListening();
+    public MessageConsumer ordersMessageConsumer(OrderReceiver receiver) throws JMSException {
+        final Session session = receiver.getSession();
+        final Queue theQ = session.createQueue(this.ordersQueue);
+        logger.error("Creating {} OrderConsumer for queue: {}", theQ, this.ordersQueue);
+        var consumer = session.createConsumer(theQ);
+        consumer.setMessageListener(receiver);
+        return consumer;
     }
 }
