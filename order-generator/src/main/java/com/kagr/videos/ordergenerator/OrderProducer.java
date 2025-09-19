@@ -41,7 +41,7 @@ public class OrderProducer {
     private final Session session;
     private Queue returnQ;
     private OrderAkcListener orderAkcListener;
-    private int correlationId = 0;
+    private int correlationId = 12345;
 
 
     @PostConstruct
@@ -74,9 +74,10 @@ public class OrderProducer {
             }
 
             msg.setJMSReplyTo(returnQ);
-            msg.setJMSCorrelationID("" + correlationId++);
+            msg.setJMSCorrelationID("" + correlationId);
             ordersMessageProducer.send(msg);
-            logger.info("Sent order message: {}", orderDetails);
+            logger.info("Sent order message: {}", correlationId);
+            correlationId += 1;
         }
         catch (Exception e) {
             logger.error("Error sending order message", e);
