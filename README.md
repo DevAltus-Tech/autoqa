@@ -1,20 +1,50 @@
-# Project Overview
+# Overview
 
-## Project Description
+## Automated Evidence Collection + Testing
 
-This java based project was built specifically to showcase automated testing & evidence collection. This non-intrusive method does not require extensive rewrites
+This java based project was built specifically to showcase automated testing & evidence collection. This non-intrusive method does not require extensive rewrites to any projects you have.
+It is designed to work with existing projects, and can be adapted to a variety of scenarios.
+The framework is designed to be flexible and extensible, allowing you to easily add new tests and validation rules as needed. The goal is to provide a robust and reliable testing framework that can be used to ensure the quality and reliability of your applications.
+
+Evidence collection is a critical aspect of software testing, as it provides a way to verify that the application is functioning as expected. This framework collects evidence in the form of logs that can be used to validate the application's behavior. It then generates a report indicating the disposoition of each test which can be attached to relese notes. 
+
+This is strong enough to satisfy **_regulatory requirements_**, and flexible enough to be used in agile environments. It works in CI/CD pipelines, and can be run locally by developers.
 
 ## The Project
 Contains the multi-module Maven project configuration, docker-compose, and this is where reports are produced. Additionally, this folder contains the ActiveMQ broker and configuration
 allowing you to divorce running that from the tests.
 
 
-The purpose of the sub-projects is to demonstate a project of suffecient complexity to showcase the testing framework. Each sub-project has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
-
+The purpose of the subprojects is to demonstrate a project of sufficient complexity to showcase the testing framework. Each subproject has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
 ![Project Structure](docs/architecture.png)
 
 
 
+# Tests
+Example configuration:
+
+```yaml
+tests:
+  termination:
+    timeout: 15000
+  jms-connect:
+    - order-generator
+    - order-client
+    - heartbeat
+  log-validation:
+    heartbeat:
+      - "HEARTBEAT .* Sent heartbeat message.*"
+    orders:
+      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
+      - ".*ORDERS .* Heartbeat sequence.*"
+
+```
+## Explanation
+### JMS Connect
+This section specifies the services that need to establish JMS (Java Message Service) connections. In this case, the order-generator and heartbeat services are specified. This means that the testing framework will validate that these services connected by inspecting management messages from Apache-Artemis. This is not log validation, but completely transparent connection validation.
+
+### Log Validation
+This section contains patterns for validating log messages. The framework will inspect the logs of the specified services and look for messages that match the provided regex patterns. If a message matches a pattern, it is considered a successful validation. This allows for a fair amount of flexibility, as the exact content of the log messages may vary, but the overall structure and key information should remain consistent.
 
 
 
@@ -80,24 +110,6 @@ the `application.yaml` file contains the configuration for the application. You 
 ## Validation
 This section contains configuration options related to the testing framework.
 x1
-Example configuration:
-```bash
-tests:
-  termination:
-    timeout: 40000
-    shutdown-on-success: true
-  jms-connect:
-    - order-generator
-    - heartbeat
-  log-validation:
-    heartbeat:
-      - "HEARTBEAT .* Sent heartbeat message.*"
-    orders:
-      - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
-      - ".*ORDERS .* Heartbeat sequence.*"
-
-```
-### Explanation
 
 *termination*: Specifies the conditions under which the tests should be terminated.
 
