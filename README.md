@@ -10,12 +10,15 @@ Evidence collection is a critical aspect of software testing, as it provides a w
 
 This is strong enough to satisfy **_regulatory requirements_**, and flexible enough to be used in agile environments. It works in CI/CD pipelines, and can be run locally by developers.
 
+
+
+
 ## The Project
 Contains the multi-module Maven project configuration, docker-compose, and this is where reports are produced. Additionally, this folder contains the ActiveMQ broker and configuration
 allowing you to divorce running that from the tests.
 
 
-The purpose of the subprojects is to demonstrate a project of sufficient complexity to showcase the testing framework. Each subproject has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
+The purpose of the subprojects is to demonstrate a project of *sufficient complexity* to **showcase** the testing framework. Each subproject has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
 ![Project Structure](docs/architecture.png)
 
 
@@ -37,93 +40,41 @@ tests:
     orders:
       - ".*ORDERS .* Received event: CONSUMER_CREATED for name: heartbeat.*"
       - ".*ORDERS .* Heartbeat sequence.*"
-
 ```
+
+
+The above snippet inddicates:
+  *  The tests should terminate after 15 seconds 
+  * The tests should validate that the order-generator, order-client, and heartbeat services connected to the broker
+  * The tests should validate that the heartbeat service sent a heartbeat message
+  
 ## Explanation
+### Termination
+This section specifies the conditions under which the tests should be terminated. In this case, a timeout of 15000 milliseconds (15 seconds) is specified. This means that if the tests do not complete within 15 seconds, they will be forcibly terminated. This is useful for preventing tests from running indefinitely in case of unexpected issues.
+
 ### JMS Connect
-This section specifies the services that need to establish JMS (Java Message Service) connections. In this case, the order-generator and heartbeat services are specified. This means that the testing framework will validate that these services connected by inspecting management messages from Apache-Artemis. This is not log validation, but completely transparent connection validation.
+This section specifies the services that need to establish JMS (Java Message Service) connections. In this case, the order-generator, order-client and heartbeat services are specified. This means that the testing framework will validate that these services connected by inspecting management messages from Apache-Artemis. This is not log validation, but completely transparent connection validation.
 
 ### Log Validation
 This section contains patterns for validating log messages. The framework will inspect the logs of the specified services and look for messages that match the provided regex patterns. If a message matches a pattern, it is considered a successful validation. This allows for a fair amount of flexibility, as the exact content of the log messages may vary, but the overall structure and key information should remain consistent.
 
 
 
-# Module Descriptions
+# Getting Started
+## Clone the repository
+```bash
+git clone https://github.com/your‑org/automated‑qa‑evidence.git
+cd automated‑qa‑evidence
+```
 
-#### jms-monitor
-*Description:* This module listens to JMS management events, and provides a framework for working with them (via callbacks).
+## Build the project
+```mvn install```
 
+Then, use Docker Compose to build and run all containers. This command builds the images if necessary and starts the order generator, order client, heartbeat monitor and validation engine.
 
-### 1. validator
-
-*Description:* This module is responsible for validating video files. It includes functionality to read logs from Docker containers and validate the content.
-*Key Classes:*
-
-- `DockerLogsReader`: Reads logs from Docker containers.
-- `DockerLogsReaderTest`: Unit tests for DockerLogsReader.
-
-### 2. heartbeat
-
-*Description:* This module handles the heartbeat functionality to ensure the application is running and responsive. It uses JMS (Java Message Service) to send and receive heartbeat messages.
-*Key Classes:*
-
-- `HearbeatConfig`: Configuration class for setting up JMS connections and heartbeat topics.
-- `ArtemisNotificationsListener`: Listens for notifications from the Artemis message broker.
-
-
-- ArtemisNotificationsListener: Listens for notifications from the Artemis message broker and processes them.
-
-
-### 4. order-generator
-*Description:* This module is responsible for generating orders and sending them to the appropriate JMS topics. It receives messages from the heartbeat modules and publishes messages to a order-queue. It also receives acks from the `order-client`
-
-*Key Classes:*
-- `OrderGenerator`: Main class responsible for generating and sending orders.
-- `OrderGeneratorConfig`: Configuration class for setting up JMS connections and order topics.
-
-
-
-
-## How to Build
-
-To build the project, you need to have Maven installed. Follow the steps below to build the project:  
-
-```bash 
-cd your-repo/projectx1g
-mvn clean install
-```  
-
-This command will compile the source code in each of the projects (including tests) and package them into JAR files. The JAR files will be placed in the `target` directory of each module.
-
-
-### Running the Application
-To run the application, you can use the following command (from the `project` directory):  
 ```bash
 docker compose up --build
 ```
-
-
-# Configuration
-All projects have a `src/main/resources` directory that contains configuration files.
-the `application.yaml` file contains the configuration for the application. You can modify this file to change the application's behavior.
-
-## Validation
-This section contains configuration options related to the testing framework.
-x1
-
-*termination*: Specifies the conditions under which the tests should be terminated.
-
-- **timeout:** Specifies the maximum time (in milliseconds) to wait before forcibly terminating the tests. In this case, it is set to 40000 milliseconds (40 seconds).
-
-- **shutdown-on-success:** If set to true, the application will shut down automatically after the tests complete successfully.
-
-
-*jms-connect*: A list of services that need to establish JMS (Java Message Service) connections. In this case, the order-generator and heartbeat services are specified.
-
-*log-validation*: This section contains patterns for validating log messages.  
-
-- **heartbeat:** Contains a list of regex patterns to validate log messages related to the heartbeat service.  
-- **orders:** Contains a list of regex patterns to validate log messages related to the orders service.
 
 
 ## Copyright (c) 2025 DevAltus, LLC
