@@ -63,7 +63,7 @@ tests:
     orders:
       - "ORDR_GEN .* Sent order message.*"
       - "ORDR_GEN .* Received Order Acknowledgment: 12345.*"
-      - "ORDR_GEN .* Received Order Acknowledgment: 72346.*"
+      - "ORDR_GEN .* Received Order Acknowledgment: 12346.*"
       - "ORDR_CLN .* Received Order Message: 12345.*"
       - "ORDR_CLN .* Received Order Message: 12346.*"
       - "ORDR_CLN .* Sent acknowledgment for message ID: 12345.*"
