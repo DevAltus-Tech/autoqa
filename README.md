@@ -78,7 +78,7 @@ docker compose up --build
 
 ## Running JMS
 Running JMS is part of the CI/CD aspect, and not part of this project. However, as a
-convenience, I have added a sample JMS docked-compose under the ‘devtools’ repository.
+convenience, I have added a sample JMS docker-compose under the ‘devtools’ repository.
 
 
 ## Copyright (c) 2025 DevAltus, LLC
