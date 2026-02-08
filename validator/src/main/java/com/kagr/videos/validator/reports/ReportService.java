@@ -9,6 +9,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,10 +28,13 @@ public class ReportService {
 
     private final VelocityEngine velocityEngine;
     private final Template reportTemplate;
+    private final JUnitXmlReportWriter junitXmlReportWriter;
     //private final List<TestStatus> tests;
     private final List<String> logs;
     private final TestCollector testCollector;
     private final TestStatus globalStatus = new TestStatus("Global Status", "PENDING", "");
+
+    private long testStartTime = System.currentTimeMillis();
 
     // Package-private getter for testing
     TestStatus getGlobalStatus() {
@@ -81,5 +85,62 @@ public class ReportService {
         else {
             globalStatus.setStatus("FAIL");
         }
+    }
+
+
+    /**
+     * Generates JUnit XML report and returns it as a string.
+     * This format is compatible with Azure DevOps test result publishing.
+     */
+    @GetMapping(value = "junit", produces = MediaType.APPLICATION_XML_VALUE)
+    public String generateJUnitXmlReport() {
+        long elapsedTimeMs = System.currentTimeMillis() - testStartTime;
+        return junitXmlReportWriter.generateXmlReport(
+                testCollector.getCompletedTests().values(),
+                testCollector.getPendingTests().values(),
+                elapsedTimeMs
+        );
+    }
+
+
+    /**
+     * Writes JUnit XML report to a file.
+     * Returns the path to the written file.
+     */
+    @PostMapping("write-junit")
+    public String writeJUnitReport(@NonNull String filePostpend) {
+        long elapsedTimeMs = System.currentTimeMillis() - testStartTime;
+        final var fname = "/app/var/reports/test-results-" + filePostpend + ".xml";
+        logger.info("writing JUnit XML report to file: {}", fname);
+
+        String result = junitXmlReportWriter.writeXmlReport(
+                testCollector.getCompletedTests().values(),
+                testCollector.getPendingTests().values(),
+                elapsedTimeMs,
+                fname
+        );
+
+        return result != null ? result : "Failed to write JUnit XML report";
+    }
+
+
+    /**
+     * Writes both HTML and JUnit XML reports.
+     * Returns a summary of written files.
+     */
+    @PostMapping("write-all")
+    public String writeAllReports(@NonNull String filePostpend) {
+        String htmlReport = writeReport(filePostpend);
+        String junitReport = writeJUnitReport(filePostpend);
+
+        return String.format("HTML: %s, JUnit XML: %s", htmlReport, junitReport);
+    }
+
+
+    /**
+     * Resets the test start time. Call this when tests begin.
+     */
+    public void resetTestStartTime() {
+        this.testStartTime = System.currentTimeMillis();
     }
 }

@@ -77,7 +77,13 @@ docker compose up --build
 
 ## Running JMS
 Running JMS is part of the CI/CD aspect, and not part of this project. However, as a
-convenience, I have added a sample JMS docker-compose under the ‘devtools’ repository.
+convenience, I have added a sample JMS docker-compose under the 'devtools' repository.
+
+
+# Documentation
+
+- [JUnit XML Report Generation](docs/JUNIT_XML_REPORT.md) - Integration with Azure DevOps and CI/CD pipelines
+- [Architecture Diagram](docs/architecture.png) - Visual overview of the system
 
 
 ## Copyright (c) 2025 DevAltus, LLC

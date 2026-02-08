@@ -213,9 +213,20 @@ public class TestCollector implements Runnable {
 
 
     public void writeShutdownReport() {
+        var timestamp = Long.toString(System.currentTimeMillis());
+
+        // Write HTML report
+        writeHtmlReport(timestamp);
+
+        // Write JUnit XML report for Azure DevOps compatibility
+        writeJUnitXmlReport(timestamp);
+    }
+
+
+    private void writeHtmlReport(String filePostpend) {
         try {
             var body = new LinkedMultiValueMap<String, String>();
-            body.add("filePostpend", Long.toString(System.currentTimeMillis()));
+            body.add("filePostpend", filePostpend);
 
             var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -225,17 +236,48 @@ public class TestCollector implements Runnable {
             var response = restTemplate.postForEntity(writeReportUrl, request, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Report written successfully to {}: {}", writeReportUrl, response.getBody());
+                logger.info("HTML report written successfully to {}: {}", writeReportUrl, response.getBody());
             }
             else {
-                logger.error("Failed to write report to {}: response was null", writeReportUrl);
+                logger.error("Failed to write HTML report to {}: response was null", writeReportUrl);
             }
         }
         catch (RestClientException ex) {
-            logger.error("RestClientException while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
+            logger.error("RestClientException while writing HTML report to {}: {}", writeReportUrl, ex.getMessage(), ex);
         }
         catch (Exception ex) {
-            logger.error("Unexpected error while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
+            logger.error("Unexpected error while writing HTML report to {}: {}", writeReportUrl, ex.getMessage(), ex);
+        }
+    }
+
+
+    private void writeJUnitXmlReport(String filePostpend) {
+        // Derive JUnit XML report URL from HTML report URL
+        String writeJUnitReportUrl = writeReportUrl.replace("/report/write", "/report/write-junit");
+
+        try {
+            var body = new LinkedMultiValueMap<String, String>();
+            body.add("filePostpend", filePostpend);
+
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+            var request = new HttpEntity<>(body, headers);
+            var response = restTemplate.postForEntity(writeJUnitReportUrl, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("JUnit XML report written successfully to {}: {}", writeJUnitReportUrl, response.getBody());
+            }
+            else {
+                logger.error("Failed to write JUnit XML report to {}: response was null", writeJUnitReportUrl);
+            }
+        }
+        catch (RestClientException ex) {
+            logger.error("RestClientException while writing JUnit XML report to {}: {}", writeJUnitReportUrl, ex.getMessage(), ex);
+        }
+        catch (Exception ex) {
+            logger.error("Unexpected error while writing JUnit XML report to {}: {}", writeJUnitReportUrl, ex.getMessage(), ex);
         }
     }
 
