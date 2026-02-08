@@ -1,9 +1,6 @@
 package com.kagr.videos.jms.monitor;
 
 
-
-
-
 import io.netty.util.internal.StringUtil;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -21,18 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-
-
-
 @Slf4j
 public class ArtemisNotificationsListener implements MessageListener {
 
     public static final String ACTIVEMQ_NOTIFICATIONS = "activemq.notifications";
     private final Connection jmsConnection;
     private final Set<BiConsumer<String, String>> consumers;
-
-
-
 
 
     @Autowired
@@ -48,9 +39,6 @@ public class ArtemisNotificationsListener implements MessageListener {
     }
 
 
-
-
-
     public ArtemisNotificationsListener startListening() throws JMSException {
         logger.info("Starting to listen for notifications");
         if (jmsConnection == null) {
@@ -60,9 +48,6 @@ public class ArtemisNotificationsListener implements MessageListener {
         jmsConnection.start();
         return this;
     }
-
-
-
 
 
     @Override
@@ -118,7 +103,6 @@ public class ArtemisNotificationsListener implements MessageListener {
             throw new RuntimeException(ex_);
         }
     }
-
 
 
     protected boolean isClientMessage(String notifType, String clientId) {

@@ -8,7 +8,7 @@
         <version>3.4.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.kagr.vidoes</groupId>
+    <groupId>com.kagr.videos</groupId>
     <artifactId>autoqa</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>

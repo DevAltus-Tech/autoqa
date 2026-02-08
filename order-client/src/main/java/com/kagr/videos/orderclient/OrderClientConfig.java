@@ -1,9 +1,6 @@
 package com.kagr.videos.orderclient;
 
 
-
-
-
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
@@ -21,9 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-
-
 
 
 @Slf4j
@@ -51,9 +45,6 @@ public class OrderClientConfig {
     private String appName;
 
 
-
-
-
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
         final TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
@@ -69,17 +60,12 @@ public class OrderClientConfig {
     }
 
 
-
-
     @Bean
     public Session jmsSession(Connection connection) throws JMSException {
         logger.info("Creating Session for connection: {}", connection);
         Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
         return session;
     }
-
-
-
 
 
     @Bean
@@ -92,9 +78,6 @@ public class OrderClientConfig {
     }
 
 
-
-
-
     @Bean
     public OrderReceiver orderReceiver(Session session) {
         logger.info("Creating OrderReceiver");
@@ -102,14 +85,11 @@ public class OrderClientConfig {
     }
 
 
-
-
-
     @Bean
     public MessageConsumer ordersMessageConsumer(OrderReceiver receiver) throws JMSException {
         final Session session = receiver.getSession();
         final Queue theQ = session.createQueue(this.ordersQueue);
-        logger.error("Creating {} OrderConsumer for queue: {}", theQ, this.ordersQueue);
+        logger.info("Creating {} OrderConsumer for queue: {}", theQ, this.ordersQueue);
         var consumer = session.createConsumer(theQ);
         consumer.setMessageListener(receiver);
         return consumer;

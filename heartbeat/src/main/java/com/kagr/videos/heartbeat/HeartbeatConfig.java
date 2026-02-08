@@ -1,9 +1,5 @@
 package com.kagr.videos.heartbeat;
 
-
-
-
-
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,15 +22,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 
-
-
-
 @Slf4j
 @Data
 @Configuration
 @EnableScheduling
 @ConfigurationProperties
-public class HearbeatConfig {
+public class HeartbeatConfig {
     @Value("${broker.url}")
     private String brokerAddress;
 
@@ -51,9 +44,6 @@ public class HearbeatConfig {
     private String appName;
 
 
-
-
-
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
         final var transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
@@ -67,18 +57,12 @@ public class HearbeatConfig {
     }
 
 
-
-
-
     @Bean
     public Session jmsSession(Connection connection) throws JMSException {
         logger.info("Creating Session for connection: {}", connection);
         final var session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
         return session;
     }
-
-
-
 
 
     @Bean
@@ -89,16 +73,10 @@ public class HearbeatConfig {
     }
 
 
-
-
-
     @Bean
     public Set<BiConsumer<String, String>> consumers() {
         return new HashSet<>();
     }
-
-
-
 
 
     @Bean

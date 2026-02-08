@@ -1,9 +1,6 @@
 package com.kagr.videos.ordergenerator;
 
 
-
-
-
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
@@ -22,9 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-
-
 
 
 @Slf4j
@@ -58,15 +52,11 @@ public class OrdersConfig {
     private String appName;
 
 
-
-
     @Bean
     OrderGenController orderGenController(OrderProducer producer) {
         logger.info("Creating OrderGenController");
         return new OrderGenController(producer);
     }
-
-
 
 
     @Bean
@@ -82,9 +72,6 @@ public class OrdersConfig {
         connection.start();
         return connection;
     }
-
-
-
 
 
     @Bean
@@ -103,7 +90,6 @@ public class OrdersConfig {
         logger.info("Creating Session for connection: {}", connection);
         return connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
     }
-
 
 
     @Bean

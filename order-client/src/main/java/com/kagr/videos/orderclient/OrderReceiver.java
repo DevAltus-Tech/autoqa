@@ -1,9 +1,6 @@
 package com.kagr.videos.orderclient;
 
 
-
-
-
 import jakarta.annotation.PostConstruct;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -19,16 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-
-
-
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderReceiver implements MessageListener {
     @Getter private final Session session;
     private MessageProducer producer;
-
 
 
     @PostConstruct

@@ -1,9 +1,6 @@
 package com.kagr.videos.validator.reports;
 
 
-
-
-
 import com.kagr.videos.validator.TestCollector;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.List;
-
-
-
 
 
 @Slf4j
@@ -44,9 +38,6 @@ public class ReportService {
     }
 
 
-
-
-
     @GetMapping("generate")
     public String generateReport() {
         VelocityContext context = new VelocityContext();
@@ -66,9 +57,6 @@ public class ReportService {
     }
 
 
-
-
-
     @PostMapping("write")
     public String writeReport(@NonNull String filePostpend) {
         String report = generateReport();
@@ -83,9 +71,6 @@ public class ReportService {
 
         return fname;
     }
-
-
-
 
 
     public void updateGlobalStatus(boolean pass, String notes) {

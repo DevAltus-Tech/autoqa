@@ -1,9 +1,6 @@
 package com.kagr.videos.validator;
 
 
-
-
-
 import com.kagr.videos.validator.logs.DockerLogsReader;
 import com.kagr.videos.validator.reports.TestStatus;
 import java.net.URI;
@@ -32,9 +29,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 
-
-
-
 @Data
 @Slf4j
 @Component
@@ -53,9 +47,6 @@ public class TestCollector implements Runnable {
     private final LinkedBlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
     private final LinkedBlockingQueue<String> relevantLogs = new LinkedBlockingQueue<>();
     private final HashSet<String> services = new HashSet<>();
-
-
-
 
 
     public void handleJmsEvent(@NonNull final String status, @NonNull final String service) {
@@ -81,9 +72,6 @@ public class TestCollector implements Runnable {
     }
 
 
-
-
-
     private void startLogListener(@NonNull final String name) {
         if (logger.isTraceEnabled()) {
             logger.trace("Starting log listener for: {}", name);
@@ -101,7 +89,6 @@ public class TestCollector implements Runnable {
             logger.error("Unknown service: {}", name);
         }
     }
-
 
 
     private void startLogReader(@NonNull final String name) {
@@ -159,7 +146,6 @@ public class TestCollector implements Runnable {
     }
 
 
-
     private void checkForAndPerformTermination() {
         if (pendingTests.isEmpty()) {
             logger.warn("All tests completed, terminating log readers");
@@ -197,9 +183,6 @@ public class TestCollector implements Runnable {
     }
 
 
-
-
-
     protected int sendShutdownCommand(@NonNull final String serviceName) {
         String url = "http://" + serviceName + ":8080/actuator/shutdown";
         logger.warn("Sending shutdown command to: {}", url);
@@ -229,8 +212,6 @@ public class TestCollector implements Runnable {
     }
 
 
-
-
     public void writeShutdownReport() {
         try {
             var body = new LinkedMultiValueMap<String, String>();
@@ -257,9 +238,6 @@ public class TestCollector implements Runnable {
             logger.error("Unexpected error while writing shutdown report to {}: {}", writeReportUrl, ex.getMessage(), ex);
         }
     }
-
-
-
 
 
     @Scheduled(fixedDelayString = "${tests.termination.timeout}", initialDelayString = "${tests.termination.timeout}")

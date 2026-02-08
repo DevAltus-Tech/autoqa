@@ -41,7 +41,6 @@ public class TestDriver {
     }
 
 
-
     private int sendOrderGeneratorStartCommand(final String serviceName) {
         String url = "http://" + serviceName + ":8080/orders/generate";
         logger.info("Sending start command to order generator: {}, url: {}", serviceName, url);

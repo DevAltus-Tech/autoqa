@@ -1,9 +1,6 @@
 package com.kagr.videos.validator;
 
 
-
-
-
 import com.kagr.videos.jms.monitor.ArtemisNotificationsListener;
 import com.kagr.videos.validator.reports.TestStatus;
 import java.util.HashSet;
@@ -35,9 +32,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-
-
-
 
 
 @Slf4j
@@ -84,9 +78,6 @@ public class ValidatorConfig implements ApplicationContextAware {
     private TestDriver driver;
 
 
-
-
-
     @Bean
     public Connection jmsConnection() throws javax.jms.JMSException {
         TransportConfiguration transportConfiguration = new TransportConfiguration(NettyConnectorFactory.class.getName());
@@ -100,18 +91,12 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public Session jmsSession(Connection connection) throws JMSException {
         logger.info("Creating Session for connection: {}", connection);
         Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
         return session;
     }
-
-
-
 
 
     @Bean
@@ -121,7 +106,6 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
     @Bean
     public String ordersClientLog() {
         logger.debug("ordersClientLog:{}", ordersClientLog);
@@ -129,13 +113,10 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
     @Bean
     public ShutdownHandler shutdownHandler() {
         return new SystemExitShutdownHandler();
     }
-
-
 
 
     @Bean
@@ -145,9 +126,6 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public String heartbeatLog() {
         logger.debug("heartbeatLog:{}", heartbeatLog);
@@ -155,14 +133,11 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public ConcurrentHashMap<String, TestStatus> pendingTests(
         @NonNull final TestConfig testConfig) {
         if (logger.isTraceEnabled()) {
-            logger.trace("ValidorConfig::pendingTests");
+            logger.trace("ValidatorConfig::pendingTests");
         }
 
         logger.info("adding connect tests");
@@ -208,13 +183,10 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public ConcurrentHashMap<String, TestStatus> completedTests() {
         if (logger.isTraceEnabled()) {
-            logger.trace("ValidorConfig::completedTests");
+            logger.trace("ValidatorConfig::completedTests");
         }
         return new ConcurrentHashMap<>();
     }
@@ -225,9 +197,6 @@ public class ValidatorConfig implements ApplicationContextAware {
         driver = new TestDriver();
         return driver;
     }
-
-
-
 
 
     @Bean
@@ -249,9 +218,6 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public Set<BiConsumer<String, String>> consumers(
         @NonNull final TestCollector collector,
@@ -268,9 +234,6 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public ArtemisNotificationsListener artemisNotificationsListener(@NonNull final Connection jmsConnection,
         @NonNull final Set<BiConsumer<String, String>> jmsEventConsumers) throws JMSException {
@@ -279,12 +242,9 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public VelocityEngine velocityEngine() {
-        logger.warn("starting velocity engine");
+        logger.info("starting velocity engine");
         VelocityEngine engine = new VelocityEngine();
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
@@ -293,14 +253,11 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public Template reportTemplate(VelocityEngine velocityEngine) {
         Template template = null;
         try {
-            logger.warn("getting report template:{}", reportTemplate);
+            logger.info("getting report template:{}", reportTemplate);
             template = velocityEngine.getTemplate(reportTemplate);
             return template;
         }
@@ -315,16 +272,10 @@ public class ValidatorConfig implements ApplicationContextAware {
     }
 
 
-
-
-
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-
-
 
 
     @Override

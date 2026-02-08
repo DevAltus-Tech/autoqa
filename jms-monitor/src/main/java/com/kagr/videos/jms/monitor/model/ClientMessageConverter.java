@@ -1,14 +1,8 @@
 package com.kagr.videos.jms.monitor.model;
 
 
-
-
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-
 
 
 public class ClientMessageConverter {
@@ -54,9 +48,6 @@ public class ClientMessageConverter {
     }
 
 
-
-
-
     private static TypedProperties parseProperties(String propertiesString) {
         TypedProperties properties = new TypedProperties();
         Pattern propertiesPattern = Pattern.compile("TypedProperties\\[(.*?)\\]");
@@ -75,9 +66,6 @@ public class ClientMessageConverter {
         }
         return properties;
     }
-
-
-
 
 
     private static void assignProperty(TypedProperties properties, String key, String value) {

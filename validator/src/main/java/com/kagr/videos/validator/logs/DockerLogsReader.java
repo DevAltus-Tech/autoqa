@@ -1,9 +1,6 @@
 package com.kagr.videos.validator.logs;
 
 
-
-
-
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +15,6 @@ import java.nio.file.Paths;
 import java.util.Queue;
 
 
-
-
-
 @Slf4j
 @Data
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -28,8 +22,6 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
     private final String loggerFileName;
     private final Queue<String> logsRead;
     private boolean shouldContinue;
-
-
 
 
 /**/
@@ -69,9 +61,6 @@ public class DockerLogsReader implements Runnable, AutoCloseable {
             logger.info("Stopped tailing logger file: {}", loggerFileName);
         }
     }
-
-
-
 
 
     @Override

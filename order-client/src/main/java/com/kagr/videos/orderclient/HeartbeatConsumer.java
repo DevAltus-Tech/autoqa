@@ -1,9 +1,6 @@
 package com.kagr.videos.orderclient;
 
 
-
-
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +12,10 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 
-
-
-
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HeartbeatConsumer implements MessageListener {
-
 
 
     @Override

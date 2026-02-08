@@ -1,9 +1,6 @@
 package com.kagr.videos.heartbeat;
 
 
-
-
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,9 +13,6 @@ import javax.jms.TextMessage;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-
-
-
 @Slf4j
 @Service
 public class HeartbeatService {
@@ -28,17 +22,11 @@ public class HeartbeatService {
     private final AtomicLong sequenceNumber = new AtomicLong(0);
 
 
-
-
-
     @Autowired
     public HeartbeatService(MessageProducer messageProducer, Session session) {
         this.messageProducer = messageProducer;
         this.session = session;
     }
-
-
-
 
 
     @Scheduled(fixedRate = 1000)

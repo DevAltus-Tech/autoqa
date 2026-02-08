@@ -1,17 +1,11 @@
 package com.kagr.videos.heartbeat;
 
 
-
-
-
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-
-
 
 
 /**
@@ -28,9 +22,6 @@ public class HeartbeatMain
         app.setBannerMode(Banner.Mode.OFF);
         app.run(args);
     }
-
-
-
 
 
     @PostConstruct

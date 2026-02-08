@@ -1,9 +1,6 @@
 package com.kagr.videos.validator;
 
 
-
-
-
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +18,6 @@ import java.util.Random;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 
-
-
-
 @Slf4j
 @EnableScheduling
 @SpringBootApplication(scanBasePackages = {"com.kagr.videos.validator"})
@@ -35,17 +29,11 @@ public class ValidatorMain {
     private final Random random = new Random();
 
 
-
-
-
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(ValidatorMain.class);
         app.setBannerMode(Banner.Mode.OFF);
         app.run(args);
     }
-
-
-
 
 
     @PostConstruct
@@ -97,15 +85,9 @@ public class ValidatorMain {
     }
 
 
-
-
-
     private String getStatusClass() {
         return random.nextBoolean() ? "success" : "failure";
     }
-
-
-
 
 
     private String getStatusSymbol() {

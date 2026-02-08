@@ -1,9 +1,6 @@
 package com.kagr.videos.ordergenerator;
 
 
-
-
-
 import jakarta.annotation.PostConstruct;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -12,9 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-
-
 
 
 @Slf4j
@@ -32,9 +26,6 @@ public class OrderProducer {
             }
         }
     }
-
-
-
 
 
     private final MessageProducer ordersMessageProducer;
@@ -61,8 +52,6 @@ public class OrderProducer {
     }
 
 
-
-
     public void sendOrder(String orderDetails) {
         try {
             var msg = session.createTextMessage();
@@ -83,9 +72,6 @@ public class OrderProducer {
             logger.error("Error sending order message", e);
         }
     }
-
-
-
 
 
     public void handleJmsEvent(String event, String name) {

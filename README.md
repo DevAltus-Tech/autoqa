@@ -2,25 +2,22 @@
 
 ## Automated Evidence Collection + Testing
 
-This java based project was built specifically to showcase automated testing & evidence collection. This non-intrusive method does not require extensive rewrites to any projects you have.
+This Java based project was built specifically to showcase automated testing & evidence collection. This non-intrusive method does not require extensive rewrites to any projects you have.
 It is designed to work with existing projects, and can be adapted to a variety of scenarios.
 The framework is designed to be flexible and extensible, allowing you to easily add new tests and validation rules as needed. The goal is to provide a robust and reliable testing framework that can be used to ensure the quality and reliability of your applications.
 
-Evidence collection is a critical aspect of software testing, as it provides a way to verify that the application is functioning as expected. This framework collects evidence in the form of logs that can be used to validate the application's behavior. It then generates a report indicating the disposoition of each test which can be attached to relese notes. 
+Evidence collection is a critical aspect of software testing, as it provides a way to verify that the application is functioning as expected. This framework collects evidence in the form of logs that can be used to validate the application's behavior. It then generates a report indicating the disposition of each test which can be attached to release notes.
 
 This is strong enough to satisfy **_regulatory requirements_**, and flexible enough to be used in agile environments. It works in CI/CD pipelines, and can be run locally by developers.
-
-
 
 
 ## The Project
 Contains the multi-module Maven project configuration, docker-compose, and this is where reports are produced. Additionally, this folder contains the ActiveMQ broker and configuration
 allowing you to divorce running that from the tests.
 
+The purpose of the subprojects is to demonstrate a project of *sufficient complexity* to **showcase** the testing framework. Each subproject has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered an actual project.
 
-The purpose of the subprojects is to demonstrate a project of *sufficient complexity* to **showcase** the testing framework. Each subproject has a specific role, and they work together to form a complete application. They are *representative* of reality, and should not be considered actual project.
 ![Project Structure](docs/architecture.png)
-
 
 
 # Tests
@@ -43,7 +40,7 @@ tests:
 ```
 
 
-The above snippet inddicates:
+The above snippet indicates:
   *  The tests should terminate after 15 seconds 
   * The tests should validate that the order-generator, order-client, and heartbeat services connected to the broker
   * The tests should validate that the heartbeat service sent a heartbeat message
@@ -68,7 +65,9 @@ cd automated‑qa‑evidence
 ```
 
 ## Build the project
-```mvn install```
+```bash
+mvn install
+```
 
 Then, use Docker Compose to build and run all containers. This command builds the images if necessary and starts the order generator, order client, heartbeat monitor and validation engine.
 
